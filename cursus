@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Lanceur des projets 42 : `./cursus` ouvre le menu, `./cursus <projet> [args]` lance directement.
+# Lanceur des projets 42 : `./cursus` ouvre le portail web, `./cursus <projet> [args]` lance directement.
 # Seul prerequis : Docker (avec compose). Les projets C/C++ tournent dans l'image toolchain,
 # les projets Docker sont lances avec docker compose depuis la machine hote.
 set -euo pipefail
@@ -36,10 +36,11 @@ toolchain() {
 # les args restent separes ("$@" dans le script)
 in_box() {
     local dir="$1" script="$2"; shift 2
+    local extra=(${DOCKER_ARGS[@]+"${DOCKER_ARGS[@]}"}); DOCKER_ARGS=()
     local tty=(-i); [ -t 0 ] && [ -t 1 ] && tty=(-it)
     toolchain
     docker run --rm "${tty[@]}" --init -v "$(host_path "$dir"):/work" -w /work \
-        ${DOCKER_ARGS[@]+"${DOCKER_ARGS[@]}"} "$IMAGE" bash -c "$script" _ "$@"
+        ${extra[@]+"${extra[@]}"} "$IMAGE" bash -c "$script" _ "$@"
 }
 DOCKER_ARGS=()
 
@@ -92,6 +93,66 @@ run_webserv() {
     DOCKER_ARGS=(-p "${port:-1045}:${port:-1045}")
     info "webserv sur ${B}http://localhost:${port:-1045}${N}  (Ctrl+C pour arreter)"
     build_run "$P/webserv" webserv "$conf"
+}
+
+# Bibliotheques : compilees puis appelees par un petit programme de demo (launcher/demos/)
+run_lib() {
+    local lib="${1:-}"; shift || true
+    [ -z "$lib" ] && lib="$(ask "Bibliotheque (libft / ft_printf / get_next_line) ?" libft)"
+    local D=/cursus/launcher/demos L=/cursus/projects
+    DOCKER_ARGS=(-v "$(host_path "$ROOT"):/cursus")
+    case "$lib" in
+        libft)
+            in_box "$ROOT/launcher" "make -s -C $L/libft bonus >/dev/null && cc -Wall -Wextra -Werror $D/libft_demo.c \
+                -I$L/libft $L/libft/libft.a -o /tmp/demo && exec /tmp/demo \"\$@\"" "$@" ;;
+        printf|ft_printf)
+            in_box "$ROOT/launcher" "make -s -C $L/ft_printf >/dev/null && cc -Wall -Wextra $D/printf_demo.c \
+                -I$L/ft_printf $L/ft_printf/libftprintf.a -o /tmp/demo && exec /tmp/demo" ;;
+        gnl|get_next_line)
+            local bs="${1:-42}" file="${2:-projects/get_next_line/get_next_line.c}"
+            in_box "$ROOT/launcher" "cc -Wall -Wextra -Werror -D BUFFER_SIZE=$bs $D/gnl_demo.c \
+                $L/get_next_line/get_next_line.c $L/get_next_line/get_next_line_utils.c -I$L/get_next_line \
+                -o /tmp/demo && exec /tmp/demo /cursus/$file" ;;
+        *) die "bibliotheque inconnue : $lib" ;;
+    esac
+}
+
+run_push_swap() {
+    local n="${1:-100}"
+    in_box "$P/push_swap" 'make -s all >/dev/null 2>&1 || make all
+        ARG=$(shuf -i 1-100000 -n "$1" | tr "\n" " ")
+        echo "$1 nombres aleatoires"
+        echo "coups       : $(./push_swap $ARG | wc -l)   (bareme : < 700 pour 100, < 5500 pour 500)"
+        echo "checker     : $(./push_swap $ARG | ./checker $ARG)"' "$n"
+}
+
+run_minitalk() {
+    local msg="${*:-Bonjour depuis le client, 42 signaux SIGUSR1/SIGUSR2 plus tard...}"
+    in_box "$P/minitalk" 'make -s all >/dev/null 2>&1 || make all
+        ./server > /tmp/out & sleep 0.5
+        pid=$(sed -n "s/.*server is \([0-9]*\).*/\1/p" /tmp/out)
+        echo "serveur lance, PID $pid"; echo "client -> \"$1\""
+        ./client "$pid" "$1"; sleep 0.5
+        echo "--- recu par le serveur :"; tail -n +2 /tmp/out; echo; kill "$pid"' "$msg"
+}
+
+run_minishell() {
+    info "minishell : tape exit pour quitter"
+    in_box "$P/minishell" "make -s all VERBOSE= >/dev/null 2>&1 || make all VERBOSE=; exec ./minishell"
+}
+
+# fdf / cub3d : MiniLibX dans un ecran virtuel, affiche dans le navigateur par noVNC
+run_gui() {
+    local prj="$1" bin="$2" arg="$3"
+    DOCKER_ARGS=(-p 127.0.0.1:6080:6080 -v "$(host_path "$ROOT/launcher"):/launcher:ro")
+    info "$prj s'affiche dans le navigateur : ${B}http://localhost:6080/vnc.html?autoconnect=1&resize=scale${N}"
+    info "Ctrl+C ici pour arreter"
+    in_box "$P/$prj" "make -s ${4:-} >/dev/null 2>&1 || make ${4:-}; exec sh /launcher/gui.sh ./$bin \"\$@\"" "$arg"
+}
+run_fdf()   { run_gui fdf fdf "includes/test_maps/${1:-42}.fdf"; }
+run_cub3d() {
+    case "${1:-}" in bonus) run_gui cub3d cub3D_bonus maps/map_b.cub bonus ;;
+                     *)     run_gui cub3d cub3D maps/map_m.cub ;; esac
 }
 
 # ---------------------------------------------------------------- stacks Docker
@@ -182,47 +243,109 @@ stack_up() {
 # ---------------------------------------------------------------- menu
 
 usage() {
-    cat <<EOF
+    cat <<EOF2
 ${B}42-cursus${N} — lanceur des projets de l'ecole 42
 
-  ./cursus                                  menu interactif
-  ./cursus philo [philo|philo_bonus] [args] ex : ./cursus philo philo 5 800 200 200 7
-  ./cursus cpp [module] [exercice] [args]   ex : ./cursus cpp 09 01 "8 9 * 9 - 9 - 9 - 4 - 1 +"
-  ./cursus webserv [config]                 serveur HTTP sur http://localhost:1045
-  ./cursus inception                        WordPress + nginx + MariaDB + bonus
-  ./cursus transcendence                    application web complete (microservices)
-  ./cursus cloud-1                          stack deployee par Cloud-1, en local
-  ./cursus stop <stack> | logs <stack> | status
-  ./cursus clean                            arrete tout, supprime volumes et image outils
-EOF
+  ./cursus                          portail web (le graph des projets) sur http://localhost:4242
+  ./cursus menu                     meme chose dans le terminal
+
+  ./cursus libft | ft_printf        demo de la bibliotheque
+  ./cursus gnl [BUFFER_SIZE] [fichier]
+  ./cursus push_swap [n]            tri de n nombres aleatoires, nombre de coups, checker
+  ./cursus minitalk [message]       serveur + client par signaux UNIX
+  ./cursus fdf [carte]              wireframe MiniLibX, affiche sur http://localhost:6080
+  ./cursus philo [philo|philo_bonus] [args]   ex : ./cursus philo philo 5 800 200 200 7
+  ./cursus minishell                shell interactif
+  ./cursus cub3d [bonus]            raycaster MiniLibX, affiche sur http://localhost:6080
+  ./cursus cpp [module] [exercice] [args]     ex : ./cursus cpp 09 01 "8 9 * 9 - 9 - 9 - 4 - 1 +"
+  ./cursus webserv [config]         serveur HTTP sur http://localhost:1045
+  ./cursus inception | transcendence | cloud-1   stacks Docker
+
+  ./cursus status | stop <stack|portal> | logs <stack> | stop-all
+  ./cursus clean                    arrete tout, supprime volumes et images
+EOF2
 }
 
 menu() {
     while true; do
         echo
         echo "${B}  42-cursus${N}"
-        echo "  ${Y}C / C++${N}"
-        echo "    1) philosophers       threads, mutex, semaphores"
-        echo "    2) cpp-modules        piscine C++98, modules 00 a 09"
-        echo "    3) webserv            serveur HTTP non bloquant (epoll, CGI)"
+        echo "  ${Y}Bibliotheques et algo${N}"
+        echo "    1) libft        2) ft_printf      3) get_next_line    4) push_swap"
+        echo "  ${Y}Systeme${N}"
+        echo "    5) minitalk     6) philosophers   7) minishell"
+        echo "  ${Y}Graphique${N}"
+        echo "    8) fdf          9) cub3d"
+        echo "  ${Y}C++${N}"
+        echo "   10) cpp-modules 11) webserv"
         echo "  ${Y}Docker / DevOps${N}"
-        echo "    4) inception          WordPress, nginx TLS, MariaDB, Redis, FTP, Portainer"
-        echo "    5) ft_transcendence   microservices Node, Vault, WAF, Prometheus/Grafana"
-        echo "    6) cloud-1            la stack deployee par Terraform + Ansible, en local"
+        echo "   12) inception   13) ft_transcendence   14) cloud-1"
         echo "    s) etat des stacks    x) tout arreter    q) quitter"
         case "$(ask "Choix ?" "")" in
-            1) run_philo ;;
-            2) run_cpp ;;
-            3) run_webserv ;;
-            4) stack_up inception ;;
-            5) stack_up transcendence ;;
-            6) stack_up cloud-1 ;;
+            1) run_lib libft ;;      2) run_lib ft_printf ;;  3) run_lib gnl ;;
+            4) run_push_swap "$(ask "Combien de nombres ?" 100)" ;;
+            5) run_minitalk "$(ask "Message ?" "Salut 42")" ;;
+            6) run_philo ;;          7) run_minishell ;;
+            8) run_fdf "$(ask "Carte (42, mars, julia, pyramide...) ?" 42)" ;;
+            9) run_cub3d "$(ask "Version (mandatory / bonus) ?" mandatory)" ;;
+            10) run_cpp ;;           11) run_webserv ;;
+            12) stack_up inception ;; 13) stack_up transcendence ;; 14) stack_up cloud-1 ;;
             s) status ;;
-            x) for s in $STACKS; do compose "$s" down; done ;;
+            x) stop_all ;;
             q|"") exit 0 ;;
             *) echo "choix inconnu" ;;
         esac
     done
+}
+
+# ---------------------------------------------------------------- portail web
+
+PORTAL="42-cursus-portal"
+
+# Chemin du depot tel que le daemon Docker le voit : Docker Desktop sous Windows expose C:\ en
+# /run/desktop/mnt/host/c ; ailleurs, c'est le meme chemin que sur la machine
+daemon_path() {
+    local h; h="$(host_path "$ROOT")"
+    case "$h" in
+        [A-Za-z]:/*) echo "/run/desktop/mnt/host/$(echo "${h:0:1}" | tr 'A-Z' 'a-z')${h:2}" ;;
+        *)           echo "$h" ;;
+    esac
+}
+
+open_url() {
+    case "$(uname -s)" in
+        MINGW*|MSYS*|CYGWIN*) cmd.exe /c start "" "$1" >/dev/null 2>&1 ;;
+        Darwin)               open "$1" ;;
+        *)                    xdg-open "$1" >/dev/null 2>&1 || true ;;
+    esac
+}
+
+portal() {
+    local dp; dp="$(daemon_path)"
+    info "Construction du portail..."
+    docker build -q -t 42-cursus/portal "$(host_path "$ROOT/launcher/portal")" >/dev/null
+    toolchain
+    docker rm -f "$PORTAL" >/dev/null 2>&1 || true
+    docker run -d --name "$PORTAL" -p 127.0.0.1:4242:4242 \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v "$(host_path "$ROOT"):$dp" -e CURSUS_ROOT="$dp" 42-cursus/portal >/dev/null
+    info "Portail : ${B}http://localhost:4242${N}   (arret : ./cursus stop portal)"
+    [ -z "${CURSUS_NO_BROWSER:-}" ] && open_url "http://localhost:4242"
+}
+
+# Point d'entree du terminal web : lance la commande demandee par la page, puis garde la sortie
+# a l'ecran au lieu de fermer la session
+web() {
+    [ $# -eq 0 ] && { menu; return; }
+    echo "${C}\$ ./cursus $*${N}"; echo
+    ( main "$@" ) || true
+    echo; echo "${G}-- termine.${N} Relance depuis la page, ou ferme ce terminal."
+    read -r _ || true
+}
+
+stop_all() {
+    for s in $STACKS; do compose "$s" down 2>/dev/null || true; done
+    docker ps -q --filter "ancestor=$IMAGE" | xargs -r docker stop >/dev/null
 }
 
 status() {
@@ -232,8 +355,10 @@ status() {
 }
 
 clean() {
+    stop_all
     for s in $STACKS; do compose "$s" down -v --remove-orphans 2>/dev/null || true; done
-    docker image rm "$IMAGE" 2>/dev/null || true
+    docker rm -f "$PORTAL" >/dev/null 2>&1 || true
+    docker image rm "$IMAGE" 42-cursus/portal 2>/dev/null || true
 }
 
 main() {
@@ -241,13 +366,23 @@ main() {
     check_docker
     local cmd="${1:-}"; shift || true
     case "$cmd" in
-        "")                    usage; menu ;;
+        "")                    portal ;;
+        menu)                  menu ;;
+        web)                   web "$@" ;;
+        stop-all)              stop_all ;;
+        stop)                  [ "${1:-}" = portal ] && { docker rm -f "$PORTAL" >/dev/null; exit 0; }
+                               compose "${1:?stack ?}" down ;;
+        libft|ft_printf|printf|gnl|get_next_line) run_lib "$cmd" "$@" ;;
+        push_swap)             run_push_swap "$@" ;;
+        minitalk)              run_minitalk "$@" ;;
+        minishell)             run_minishell ;;
+        fdf)                   run_fdf "$@" ;;
+        cub3d|cub3D)           run_cub3d "$@" ;;
         philo|philosophers)    run_philo "$@" ;;
         cpp|cpp-modules)       run_cpp "$@" ;;
         webserv)               run_webserv "$@" ;;
         inception|cloud-1)     stack_up "$cmd" ;;
         transcendence|ft_transcendence) stack_up transcendence ;;
-        stop)                  compose "${1:?stack ?}" down ;;
         logs)                  compose "${1:?stack ?}" logs -f --tail=100 ;;
         status)                status ;;
         clean)                 clean ;;

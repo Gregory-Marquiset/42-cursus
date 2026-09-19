@@ -15,3 +15,9 @@ dep/
 # Sorties des scripts de test de la piscine C++
 debug.txt
 .make.txt
+
+# Artefacts des projets du tronc commun
+objs/
+objs_and_deps*/
+*.a
+make_interface/

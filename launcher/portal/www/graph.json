@@ -1,0 +1,40 @@
+{
+  "_comment": "Holy graph du tronc commun. a = angle en degres (0 = droite, sens trigo), ring = anneau. project renvoie a projects.json ; sans project, le noeud est une alternative non choisie ou un examen.",
+  "rings": [0, 95, 180, 265, 350, 435, 520, 620],
+  "nodes": [
+    { "id": "libft", "name": "Libft", "ring": 0, "a": 0, "project": "libft" },
+
+    { "id": "ft_printf", "name": "ft_printf", "ring": 1, "a": 35, "project": "ft_printf", "after": ["libft"] },
+    { "id": "gnl", "name": "get_next_line", "ring": 1, "a": -65, "project": "get_next_line", "after": ["libft"] },
+    { "id": "b2br", "name": "Born2beroot", "ring": 1, "a": 165, "project": "born2beroot", "after": ["libft"] },
+
+    { "id": "push_swap", "name": "push_swap", "ring": 2, "a": 115, "project": "push_swap", "after": ["b2br"] },
+    { "id": "pipex", "name": "pipex", "ring": 2, "a": 72, "alt": true, "after": ["ft_printf"] },
+    { "id": "minitalk", "name": "minitalk", "ring": 2, "a": 42, "project": "minitalk", "after": ["ft_printf"] },
+    { "id": "fdf", "name": "FdF", "ring": 2, "a": 8, "project": "fdf", "after": ["ft_printf"] },
+    { "id": "fractol", "name": "fract-ol", "ring": 2, "a": -18, "alt": true, "after": ["gnl"] },
+    { "id": "so_long", "name": "so_long", "ring": 2, "a": -42, "alt": true, "after": ["gnl"] },
+    { "id": "exam02", "name": "Exam Rank 02", "ring": 2, "a": -85, "exam": true, "after": ["gnl"] },
+
+    { "id": "minishell", "name": "minishell", "ring": 3, "a": 130, "project": "minishell", "after": ["push_swap"] },
+    { "id": "philo", "name": "Philosophers", "ring": 3, "a": 205, "project": "philosophers", "after": ["push_swap"] },
+    { "id": "exam03", "name": "Exam Rank 03", "ring": 3, "a": -62, "exam": true, "after": ["exam02"] },
+
+    { "id": "cub3d", "name": "cub3D", "ring": 4, "a": 168, "project": "cub3d", "after": ["minishell"] },
+    { "id": "minirt", "name": "miniRT", "ring": 4, "a": 150, "alt": true, "after": ["minishell"] },
+    { "id": "netpractice", "name": "NetPractice", "ring": 4, "a": 262, "project": "netpractice", "after": ["philo"] },
+    { "id": "cpp0", "name": "CPP 00–04", "ring": 4, "a": 228, "project": "cpp", "args": ["cpp", "04", "03"], "after": ["philo"] },
+    { "id": "exam04", "name": "Exam Rank 04", "ring": 4, "a": -38, "exam": true, "after": ["exam03"] },
+
+    { "id": "webserv", "name": "webserv", "ring": 5, "a": 135, "project": "webserv", "after": ["cub3d"] },
+    { "id": "ft_irc", "name": "ft_irc", "ring": 5, "a": 100, "alt": true, "after": ["cub3d"] },
+    { "id": "cpp5", "name": "CPP 05–09", "ring": 5, "a": 238, "project": "cpp", "after": ["cpp0"] },
+    { "id": "inception", "name": "Inception", "ring": 5, "a": 290, "project": "inception", "after": ["netpractice"] },
+    { "id": "exam05", "name": "Exam Rank 05", "ring": 5, "a": -16, "exam": true, "after": ["exam04"] },
+
+    { "id": "transcendence", "name": "ft_transcendence", "ring": 6, "a": 128, "project": "ft_transcendence", "after": ["webserv"] },
+    { "id": "exam06", "name": "Exam Rank 06", "ring": 6, "a": 8, "exam": true, "after": ["exam05"] },
+
+    { "id": "cloud1", "name": "cloud-1", "ring": 7, "a": 300, "project": "cloud-1", "outer": true, "after": ["inception"] }
+  ]
+}

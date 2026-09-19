@@ -1,82 +1,125 @@
 # 42-cursus
 
-Mes projets de l'école 42 réunis dans un seul dépôt. Chacun se lance avec **une commande** ;
-la seule chose à installer est **Docker**.
+*[Version française](README.fr.md)*
+
+All my projects from 42 school's common core in one repository. **One command** opens an
+interactive map of the cursus, and every project runs from it in a click. The only thing you
+need installed is **Docker**.
 
 ```bash
 git clone https://github.com/Gregory-Marquiset/42-cursus.git
 cd 42-cursus
-./cursus            # ou : make
+./cursus            # or: make
 ```
 
-Le menu propose de compiler et lancer chaque projet. Les projets C/C++ tournent dans une image
-Debian avec clang (comme sur les postes de l'école), les projets Docker sont démarrés avec
-`docker compose` : on n'installe rien d'autre sur la machine.
+This opens **http://localhost:4242**: the cursus "holy graph". Click a project to read what it
+does and who I built it with, then hit **Run**:
 
-## Projets
+- programs run in a terminal embedded in the page
+- graphical projects (FdF, cub3D) open a virtual screen next to it
+- web stacks (Inception, ft_transcendence, Cloud-1) come up with links to open them
 
-| Projet | Sujet | Stack | Lancer |
+## Projects
+
+| Rank | Project | What it is | Stack |
 |---|---|---|---|
-| [philosophers](projects/philosophers) | Le dîner des philosophes : concurrence, deadlocks, data races | C, pthreads, sémaphores | `./cursus philo` |
-| [cpp-modules](projects/cpp-modules) | Piscine C++, modules 00 à 09 : POO, templates, STL | C++98 | `./cursus cpp` |
-| [webserv](projects/webserv) | Serveur HTTP/1.1 non bloquant, CGI, upload, multi-ports | C++98, epoll | `./cursus webserv` |
-| [inception](projects/inception) | Infrastructure WordPress, une image Docker par service écrite à la main | Docker, nginx, MariaDB, Redis, FTP, Portainer | `./cursus inception` |
-| [ft_transcendence](projects/ft_transcendence) | Plateforme web complète en microservices | Node/Fastify, React, PostgreSQL, Vault, WAF, Prometheus/Grafana | `./cursus transcendence` |
-| [cloud-1](projects/cloud-1) | Déploiement automatisé d'Inception sur plusieurs serveurs | Terraform, Ansible, Docker | `./cursus cloud-1` |
+| 00 | [libft](projects/libft) | My own C library, the base of every later project | C |
+| 01 | [ft_printf](projects/ft_printf) | printf reimplemented, bonus flags included | C, variadics |
+| 01 | [get_next_line](projects/get_next_line) | Line-by-line reading whatever the buffer size | C |
+| 01 | [born2beroot](projects/born2beroot) | Hardened Debian server in a VM (the VM signature) | Debian, LVM, UFW |
+| 02 | [push_swap](projects/push_swap) | Sorting with a restricted instruction set, plus the checker | C, algorithms |
+| 02 | [minitalk](projects/minitalk) | Client/server messaging over UNIX signals only | C, signals |
+| 02 | [FdF](projects/fdf) | Isometric wireframe renderer | C, MiniLibX |
+| 03 | [philosophers](projects/philosophers) | Dining philosophers with threads, then processes and semaphores | C, pthreads |
+| 03 | [minishell](projects/minishell) | A bash-like shell: parser, AST, pipes, redirections | C |
+| 04 | [NetPractice](projects/netpractice) | IP addressing and routing exercises | TCP/IP |
+| 04 | [cub3D](projects/cub3d) | Wolfenstein-style raycasting engine | C, MiniLibX |
+| 04–05 | [CPP modules](projects/cpp-modules) | The C++ piscine, modules 00 to 09 | C++98 |
+| 05 | [webserv](projects/webserv) | Non-blocking HTTP server with CGI | C++98, epoll |
+| 05 | [Inception](projects/inception) | Containerised WordPress infrastructure, every image hand-written | Docker |
+| 06 | [ft_transcendence](projects/ft_transcendence) | Full microservices web platform | Node, React, Vault, Prometheus |
+| — | [Cloud-1](projects/cloud-1) | Inception deployed automatically on several servers | Terraform, Ansible |
 
-webserv et ft_transcendence sont des projets d'équipe : leurs dépôts d'origine restent la
-référence, avec l'historique et les contributions de chacun
-([mcg_webserv](https://github.com/Gregory-Marquiset/mcg_webserv),
-[llmcg_transcendence](https://github.com/Gregory-Marquiset/llmcg_transcendence)).
+### Built with
 
-## Utilisation
+- **minishell** with [Jérôme Portier](https://profile.intra.42.fr/users/jeportie) (jeportie)
+- **cub3D** with [Charles-Louis Dutel](https://profile.intra.42.fr/users/cdutel) (cdutel)
+- **webserv** with [Charles-Louis Dutel](https://profile.intra.42.fr/users/cdutel) (cdutel) and
+  [Marie Langlois](https://profile.intra.42.fr/users/malanglo) (malanglo)
+- **ft_transcendence** with [Charles-Louis Dutel](https://profile.intra.42.fr/users/cdutel) (cdutel),
+  [Lou Briottet](https://profile.intra.42.fr/users/lobriott) (lobriott),
+  [Mathieu Da Cunha](https://profile.intra.42.fr/users/mda-cunh) (mda-cunh) and
+  [Liam Zaengel](https://profile.intra.42.fr/users/lzaengel) (lzaengel)
+
+The team projects keep their own repositories, with the full history and everyone's commits:
+[mcg_webserv](https://github.com/Gregory-Marquiset/mcg_webserv),
+[llmcg_transcendence](https://github.com/Gregory-Marquiset/llmcg_transcendence).
+
+## Command line
+
+Everything in the web page is also available from a terminal:
 
 ```bash
-./cursus philo philo 5 800 200 200 7          # version, puis arguments du programme
-./cursus philo philo_bonus 4 410 200 200
-./cursus cpp 09 01 "8 9 * 9 - 9 - 9 - 4 - 1 +" # module, exercice, arguments  -> 42
+./cursus menu                                  # the same menu, in the terminal
+./cursus libft | ft_printf                     # small demo programs calling the library
+./cursus gnl 7 projects/philosophers/philo/src/main.c   # BUFFER_SIZE, file
+./cursus push_swap 500                         # sort 500 random numbers, count moves, run the checker
+./cursus minitalk "hello"                      # server + client
+./cursus philo philo 5 800 200 200 7           # version, then the program's arguments
+./cursus minishell
+./cursus fdf mars                              # opens a screen on http://localhost:6080
+./cursus cub3d bonus
+./cursus cpp 09 01 "8 9 * 9 - 9 - 9 - 4 - 1 +" # module, exercise, arguments  -> 42
 ./cursus webserv                               # http://localhost:1045
 ./cursus inception                             # https://localhost
 ./cursus transcendence                         # https://localhost:8001
 ./cursus cloud-1                               # https://localhost
 
-./cursus status                                # état des stacks Docker
-./cursus stop <stack>                          # inception | transcendence | cloud-1
-./cursus logs <stack>
-./cursus clean                                 # arrête tout, supprime volumes et image outils
+./cursus status | stop <stack|portal> | logs <stack> | stop-all
+./cursus clean                                 # stop everything, remove volumes and images
 ```
 
-Sans argument, `./cursus cpp` et `./cursus philo` posent les questions une à une.
-Les cibles `make` existent aussi : `make philo ARGS="philo 5 800 200 200"`, `make inception`…
+## How it works
 
-### Ce que fait le lanceur au premier démarrage
+```
+./cursus ──► portal container (nginx + ttyd, :4242)
+               │  page: graph.json + projects.json
+               │  web terminal runs ./cursus <project>
+               ▼
+             host Docker daemon (through its socket)
+               ├─ toolchain image: Ubuntu 22.04, clang 12, valgrind, X11 libs,
+               │                   Xvfb + noVNC for MiniLibX projects
+               └─ docker compose: Inception, ft_transcendence, Cloud-1
+```
 
-- **Image outils** `42-cursus/toolchain` construite une fois (Debian, clang, valgrind, gdb, et
-  les interpréteurs CGI de webserv).
-- **Secrets générés** au lieu d'être versionnés : mots de passe d'Inception dans
-  `projects/inception/srcs/secrets/`, `.env` et certificat auto-signé de Cloud-1. Tout est
-  ignoré par git.
-- **Une stack à la fois** : Inception et Cloud-1 écoutent toutes deux sur le 443, démarrer
-  l'une arrête les autres.
-- **Cloud-1 en local** : la stack que Terraform et Ansible déploient sur les serveurs, lancée sur
-  la machine, WordPress installé par WP-CLI comme le fait le rôle Ansible. Le déploiement réel
-  est décrit dans [projects/cloud-1/README.md](projects/cloud-1/README.md).
+- **Same compiler as the school.** `cc` and `c++` are clang 12 on Ubuntu 22.04, like 42's
+  workstations. Newer clangs add warnings that break the projects' `-Werror`.
+- **The portal drives Docker without seeing the host's filesystem.** The repository is mounted
+  at the path the Docker daemon knows (`/run/desktop/mnt/host/c/...` on Docker Desktop for
+  Windows, the same path elsewhere), so the containers and compose files it starts resolve
+  their bind mounts correctly.
+- **Secrets are generated, never committed.** Inception's passwords, Cloud-1's `.env` and
+  self-signed certificate are created on first run and ignored by git.
+- **One stack at a time.** Inception and Cloud-1 both listen on 443, so starting one stops
+  the other.
 
-### Adaptations pour tourner hors de l'école
+### Changes needed to run outside the school
 
-Le code des projets est celui rendu en évaluation. Les écarts nécessaires pour les lancer
-ailleurs passent par des surcharges compose dans [`launcher/`](launcher), pas par une modification
-des projets :
+The code is what was submitted for evaluation. Anything needed to run it elsewhere lives in
+[`launcher/`](launcher) as compose overrides or wrappers, not in the projects:
 
-- Inception : le sujet impose des volumes liés à `/home/<login>/data`, remplacés par des volumes
-  nommés.
-- ft_transcendence : `backup` (service ponctuel) sort du `up`, et le healthcheck d'Adminer suit
-  l'image `adminer:latest`, qui a renommé son binaire PHP depuis le rendu.
+- Inception: the subject requires volumes bound to `/home/<login>/data`, replaced by named volumes.
+- ft_transcendence: `backup` (a one-shot service) is left out of `up`, and Adminer's healthcheck
+  follows `adminer:latest`, which renamed its PHP binary after the project was graded.
+- push_swap: the last commit on vogsphere depends on a version of my libft that was never
+  committed; this repository holds the previous commit, which is complete.
+- Libraries (libft, ft_printf, get_next_line) have no `main`: small demo programs in
+  [`launcher/demos/`](launcher/demos) call them.
 
-## Prérequis
+## Requirements
 
-- Docker avec le plugin compose (Docker Desktop sur Windows/macOS)
-- bash : Linux, macOS, WSL ou Git Bash sous Windows
+- Docker with the compose plugin (Docker Desktop on Windows and macOS)
+- bash: Linux, macOS, WSL, or Git Bash on Windows
 
-Ports utilisés : 1045 (webserv), 443, 9443, 21 et 30000-30009 (Inception), 443 et 80 (Cloud-1),
-8000, 8001, 8080, 3000, 9090 et 8200 (ft_transcendence).
+Ports: 4242 (portal), 6080 (virtual screen), 1045 (webserv), 443, 9443, 21 and 30000-30009
+(Inception), 80 and 443 (Cloud-1), 8000, 8001, 8080, 3000, 9090 and 8200 (ft_transcendence).

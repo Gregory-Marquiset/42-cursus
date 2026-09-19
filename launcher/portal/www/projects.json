@@ -1,0 +1,130 @@
+{
+  "repo": "https://github.com/Gregory-Marquiset/42-cursus",
+  "login": "gmarquis",
+  "people": {
+    "jeportie": "Jérôme Portier",
+    "cdutel": "Charles-Louis Dutel",
+    "malanglo": "Marie Langlois",
+    "lobriott": "Lou Briottet",
+    "mda-cunh": "Mathieu Da Cunha",
+    "lzaengel": "Liam Zaengel"
+  },
+  "projects": {
+    "libft": {
+      "path": "projects/libft",
+      "stack": ["C"],
+      "run": { "args": ["libft"] },
+      "fr": "Ma propre bibliothèque C : réécriture d'une partie de la libc (mémoire, chaînes, conversions) et des listes chaînées. Elle sert de base à tous les projets suivants.",
+      "en": "My own C library: a rewrite of part of libc (memory, strings, conversions) plus linked lists. Every later project builds on it."
+    },
+    "ft_printf": {
+      "path": "projects/ft_printf",
+      "stack": ["C", "variadic"],
+      "run": { "args": ["ft_printf"] },
+      "fr": "Réimplémentation de printf avec les fonctions variadiques, bonus compris : largeur, précision, drapeaux -0.# +. La démo compare chaque ligne à la vraie printf.",
+      "en": "printf reimplemented with variadic functions, bonus included: width, precision, -0.# + flags. The demo checks every line against the real printf."
+    },
+    "get_next_line": {
+      "path": "projects/get_next_line",
+      "stack": ["C", "static variables"],
+      "run": { "args": ["gnl", "7"] },
+      "fr": "Lire un fichier ligne par ligne, quelle que soit la taille du buffer, en gardant le reste entre deux appels. La démo lit le code source de get_next_line avec BUFFER_SIZE=7.",
+      "en": "Read a file line by line whatever the buffer size, keeping leftovers between calls. The demo reads get_next_line's own source with BUFFER_SIZE=7."
+    },
+    "born2beroot": {
+      "path": "projects/born2beroot",
+      "stack": ["Debian", "LVM", "UFW", "sudo", "AppArmor"],
+      "fr": "Installation durcie d'un serveur Debian en machine virtuelle : partitions LVM chiffrées, politique de mots de passe, sudo journalisé, pare-feu, script de supervision par cron. Le rendu est la signature de la VM : rien à lancer.",
+      "en": "Hardened Debian server install in a VM: encrypted LVM, password policy, logged sudo, firewall, cron monitoring script. The deliverable is the VM signature, so there is nothing to run."
+    },
+    "push_swap": {
+      "path": "projects/push_swap",
+      "stack": ["C", "algorithms"],
+      "run": { "args": ["push_swap", "500"] },
+      "fr": "Trier une pile avec un jeu d'opérations limité et le moins de coups possible (algorithme par coût minimal), plus le checker en bonus. La démo trie 500 nombres aléatoires.",
+      "en": "Sort a stack with a restricted instruction set in as few moves as possible (cheapest-move algorithm), with the bonus checker. The demo sorts 500 random numbers."
+    },
+    "minitalk": {
+      "path": "projects/minitalk",
+      "stack": ["C", "UNIX signals"],
+      "run": { "args": ["minitalk"] },
+      "fr": "Un client envoie un message à un serveur bit par bit, avec seulement SIGUSR1 et SIGUSR2.",
+      "en": "A client sends a message to a server bit by bit, using nothing but SIGUSR1 and SIGUSR2."
+    },
+    "fdf": {
+      "path": "projects/fdf",
+      "stack": ["C", "MiniLibX", "3D projection"],
+      "run": { "args": ["fdf", "42"], "screen": true },
+      "fr": "Rendu en fil de fer d'une carte d'altitudes en projection isométrique, avec dégradés de couleur, zoom, rotation et déplacement.",
+      "en": "Isometric wireframe rendering of a height map, with color gradients, zoom, rotation and panning."
+    },
+    "philosophers": {
+      "path": "projects/philosophers",
+      "stack": ["C", "pthreads", "semaphores"],
+      "run": { "args": ["philo", "philo", "5", "800", "200", "200", "7"] },
+      "fr": "Le dîner des philosophes : des threads et des mutex (des processus et des sémaphores en bonus), sans data race ni interblocage, avec une mort détectée à 10 ms près.",
+      "en": "The dining philosophers: threads and mutexes (processes and semaphores for the bonus), with no data races or deadlocks and deaths detected within 10 ms."
+    },
+    "minishell": {
+      "path": "projects/minishell",
+      "team": ["jeportie"],
+      "stack": ["C", "readline", "AST", "fork/exec"],
+      "run": { "args": ["minishell"] },
+      "fr": "Un shell façon bash : tokenizer, arbre syntaxique, pipes, redirections, heredoc, variables d'environnement, builtins, signaux.",
+      "en": "A bash-like shell: tokenizer, syntax tree, pipes, redirections, heredoc, environment variables, builtins, signals."
+    },
+    "netpractice": {
+      "path": "projects/netpractice",
+      "stack": ["TCP/IP", "subnetting", "routing"],
+      "fr": "Dix exercices de configuration réseau : adressage IP, masques, passerelles, tables de routage. Les solutions sont les fichiers JSON des niveaux : rien à lancer.",
+      "en": "Ten network configuration exercises: IP addressing, masks, gateways, routing tables. The solutions are the level JSON files, so there is nothing to run."
+    },
+    "cub3d": {
+      "path": "projects/cub3d",
+      "team": ["cdutel"],
+      "stack": ["C", "MiniLibX", "raycasting"],
+      "run": { "args": ["cub3d", "bonus"], "screen": true },
+      "fr": "Un moteur façon Wolfenstein 3D : raycasting DDA, textures par face, collisions, et en bonus minimap, portes et souris.",
+      "en": "A Wolfenstein 3D-style engine: DDA raycasting, per-side textures, collisions, and for the bonus a minimap, doors and mouse look."
+    },
+    "cpp": {
+      "path": "projects/cpp-modules",
+      "stack": ["C++98", "OOP", "templates", "STL"],
+      "run": { "args": ["cpp", "09", "01", "8 9 * 9 - 9 - 9 - 4 - 1 +"] },
+      "fr": "La piscine C++, modules 00 à 09 : classes, forme canonique, héritage, polymorphisme, exceptions, casts, templates, conteneurs de la STL. La démo lance RPN (module 09). Pour choisir un autre exercice : ./cursus cpp.",
+      "en": "The C++ piscine, modules 00 to 09: classes, canonical form, inheritance, polymorphism, exceptions, casts, templates, STL containers. The demo runs RPN (module 09); ./cursus cpp picks any other exercise."
+    },
+    "webserv": {
+      "path": "projects/webserv",
+      "team": ["cdutel", "malanglo"],
+      "origin": "https://github.com/Gregory-Marquiset/mcg_webserv",
+      "stack": ["C++98", "epoll", "HTTP/1.1", "CGI"],
+      "run": { "args": ["webserv"], "urls": [["Site", "http://localhost:1045"]] },
+      "fr": "Un serveur HTTP non bloquant écrit de zéro, avec une seule boucle epoll : fichier de configuration à la nginx, GET/POST/DELETE, upload, CGI (Python, Perl, PHP, Node), sessions et plusieurs ports.",
+      "en": "A non-blocking HTTP server from scratch on a single epoll loop: nginx-style config, GET/POST/DELETE, uploads, CGI (Python, Perl, PHP, Node), sessions, multiple ports."
+    },
+    "inception": {
+      "path": "projects/inception",
+      "stack": ["Docker", "nginx", "MariaDB", "WordPress", "Redis"],
+      "run": { "args": ["inception"], "urls": [["WordPress", "https://localhost"], ["Portainer", "https://localhost:9443"]] },
+      "fr": "Toute une infrastructure en conteneurs, chaque image écrite à la main à partir d'Alpine : nginx en TLS, WordPress sur php-fpm, MariaDB, secrets Docker. Bonus : Redis, FTP, Adminer, Portainer et un site statique.",
+      "en": "A whole containerised infrastructure, every image hand-written from Alpine: nginx over TLS, WordPress on php-fpm, MariaDB, Docker secrets. Bonus: Redis, FTP, Adminer, Portainer and a static site."
+    },
+    "ft_transcendence": {
+      "path": "projects/ft_transcendence",
+      "team": ["cdutel", "lobriott", "mda-cunh", "lzaengel"],
+      "origin": "https://github.com/Gregory-Marquiset/llmcg_transcendence",
+      "stack": ["Node/Fastify", "React", "PostgreSQL", "Vault", "ModSecurity", "Prometheus", "Grafana"],
+      "run": { "args": ["transcendence"], "urls": [["App", "https://localhost:8001"], ["Grafana", "http://localhost:3000"], ["Prometheus", "http://localhost:9090"]] },
+      "fr": "Une plateforme web complète qui transforme le cursus 42 en jeu (défis, XP, badges, chat en temps réel), découpée en microservices. Côté DevOps : secrets dans Vault, WAF ModSecurity, métriques Prometheus/Grafana, sauvegardes, CI.",
+      "en": "A full web platform that gamifies the 42 cursus (challenges, XP, badges, real-time chat), split into microservices. On the DevOps side: secrets in Vault, ModSecurity WAF, Prometheus/Grafana metrics, backups, CI."
+    },
+    "cloud-1": {
+      "path": "projects/cloud-1",
+      "stack": ["Terraform", "Ansible", "Docker", "Proxmox"],
+      "run": { "args": ["cloud-1"], "urls": [["WordPress", "https://localhost"], ["phpMyAdmin", "https://localhost/phpmyadmin/"]] },
+      "fr": "Inception déployé automatiquement sur plusieurs serveurs : Terraform crée les VM et génère l'inventaire, Ansible les provisionne et installe WordPress. Ici, la stack tourne en local ; le déploiement réel est décrit dans le README.",
+      "en": "Inception deployed automatically across several servers: Terraform creates the VMs and generates the inventory, Ansible provisions them and installs WordPress. Here the stack runs locally; the README describes the real deployment."
+    }
+  }
+}

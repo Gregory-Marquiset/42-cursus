@@ -1,15 +1,14 @@
-# Raccourcis vers ./cursus — `make` ouvre le menu
-.DEFAULT_GOAL := menu
-.PHONY: menu philo cpp webserv inception transcendence cloud-1 status stop clean help
+# Raccourcis vers ./cursus — `make` ouvre le portail web, `make <projet> ARGS="..."` lance un projet
+.DEFAULT_GOAL := portal
+PROJECTS := libft ft_printf gnl push_swap minitalk fdf philo minishell cub3d cpp webserv \
+            inception transcendence cloud-1
+.PHONY: portal menu status stop stop-all clean help $(PROJECTS)
 
-menu:          ; @./cursus
-philo:         ; @./cursus philo $(ARGS)
-cpp:           ; @./cursus cpp $(ARGS)
-webserv:       ; @./cursus webserv $(ARGS)
-inception:     ; @./cursus inception
-transcendence: ; @./cursus transcendence
-cloud-1:       ; @./cursus cloud-1
-status:        ; @./cursus status
-stop:          ; @./cursus stop $(STACK)
-clean:         ; @./cursus clean
-help:          ; @./cursus help
+portal:      ; @./cursus
+menu:        ; @./cursus menu
+$(PROJECTS): ; @./cursus $@ $(ARGS)
+status:      ; @./cursus status
+stop:        ; @./cursus stop $(STACK)
+stop-all:    ; @./cursus stop-all
+clean:       ; @./cursus clean
+help:        ; @./cursus help

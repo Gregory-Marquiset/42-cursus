@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>42-cursus</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%2300babc'/%3E%3Ctext x='16' y='21' font-family='sans-serif' font-size='13' font-weight='700' text-anchor='middle' fill='%230b1020'%3E42%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0b1020;
+    --bg-2: #111831;
+    --panel: #141c36;
+    --line: #26325a;
+    --ring: #1d8f96;
+    --text: #e6ebf5;
+    --muted: #8d97b5;
+    --teal: #00babc;
+    --teal-ink: #04262a;
+    --alt: #3a4466;
+    --exam: #2c6b73;
+    --radius: 12px;
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(ellipse at 50% 55%, #16204a 0%, var(--bg) 60%);
+    background-color: var(--bg);
+    color: var(--text); font: 15px/1.5 var(--font); overflow: hidden;
+  }
+  button, a.btn {
+    font: inherit; font-size: 14px; color: var(--text); background: var(--bg-2);
+    border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; cursor: pointer;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+  }
+  button:hover, a.btn:hover { border-color: var(--teal); }
+  button:focus-visible, a.btn:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+  .primary { background: var(--teal); color: var(--teal-ink); border-color: var(--teal); font-weight: 600; }
+  .primary:hover { filter: brightness(1.1); }
+
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 5; pointer-events: none;
+    display: flex; justify-content: space-between; align-items: flex-start; padding: 18px 20px;
+  }
+  header > * { pointer-events: auto; }
+  .brand h1 { margin: 0; font-size: 22px; letter-spacing: .3px; }
+  .brand h1 span { color: var(--teal); }
+  .brand p { margin: 2px 0 0; color: var(--muted); font-size: 13px; max-width: 46ch; }
+  .tools { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+  .legend {
+    position: fixed; left: 20px; bottom: 18px; z-index: 4; display: flex; gap: 14px; flex-wrap: wrap;
+    color: var(--muted); font-size: 12px;
+  }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+
+  #graph { position: fixed; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+  #graph.dragging { cursor: grabbing; }
+  .ring { fill: none; stroke: var(--ring); stroke-opacity: .55; stroke-width: 2; }
+  .ring.outer { stroke-dasharray: 3 7; stroke-opacity: .35; }
+  .edge { stroke: var(--teal); stroke-opacity: .35; stroke-width: 2; }
+  .edge.dim { stroke: var(--alt); stroke-opacity: .5; }
+  .node { cursor: pointer; }
+  .node circle { transition: filter .15s; }
+  .node.done circle { fill: var(--teal); }
+  .node.done text { fill: var(--teal-ink); font-weight: 700; }
+  .node.alt circle { fill: var(--bg-2); stroke: var(--alt); stroke-width: 2; }
+  .node.alt text { fill: var(--muted); }
+  .node.exam rect { fill: var(--exam); }
+  .node.exam text { fill: #d7f6f7; font-weight: 600; }
+  .node:focus { outline: none; }
+  .node:hover circle, .node:hover rect, .node:focus-visible circle, .node:focus-visible rect, .node.sel circle, .node.sel rect { filter: drop-shadow(0 0 10px var(--teal)); }
+  .node.sel circle { stroke: #fff; stroke-width: 3; }
+  .node text { font-family: var(--font); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+
+  aside {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100%); z-index: 6;
+    background: var(--panel); border-left: 1px solid var(--line); padding: 22px 22px 28px;
+    transform: translateX(100%); transition: transform .22s ease; overflow-y: auto;
+  }
+  aside.open { transform: none; }
+  aside .close { position: absolute; top: 14px; right: 14px; padding: 4px 10px; }
+  aside h2 { margin: 0 0 4px; font-size: 24px; }
+  aside .kicker { color: var(--teal); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  aside p.desc { color: #cfd6e8; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+  .tags span { font-size: 12px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 99px; padding: 2px 9px; color: var(--muted); }
+  .team { margin: 14px 0; font-size: 14px; color: var(--muted); }
+  .team a { color: var(--text); }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  code.cmd { display: block; margin-top: 14px; font: 13px var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; color: var(--muted); word-break: break-all; }
+
+  #drawer {
+    position: fixed; left: 0; right: 0; bottom: 0; height: min(58vh, 560px); z-index: 7;
+    background: var(--bg); border-top: 1px solid var(--line); display: none; flex-direction: column;
+  }
+  #drawer.open { display: flex; }
+  #drawer .bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  #drawer .bar strong { margin-right: auto; font: 13px var(--mono); color: var(--muted); }
+  #drawer .panes { flex: 1; display: flex; min-height: 0; }
+  #drawer iframe { border: 0; flex: 1; min-width: 0; background: var(--bg); }
+  #drawer iframe.screen { flex: 1.6; border-left: 1px solid var(--line); background: #000; }
+  body.running aside { bottom: min(58vh, 560px); }
+
+  @media (max-width: 700px) {
+    .brand p { display: none; }
+    aside { top: auto; height: 62vh; width: 100%; border-left: 0; border-top: 1px solid var(--line); transform: translateY(100%); }
+    #drawer .panes { flex-direction: column; }
+    #drawer iframe.screen { border-left: 0; border-top: 1px solid var(--line); }
+    .legend { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <h1><span>42</span>-cursus</h1>
+    <p data-i18n="tagline"></p>
+  </div>
+  <div class="tools">
+    <button id="lang" title="Langue / Language">EN</button>
+    <button id="fit" data-i18n="fit"></button>
+    <button id="stopall" data-i18n="stopall"></button>
+  </div>
+</header>
+
+<svg id="graph" role="img" aria-label="Holy graph"><g id="world"></g></svg>
+
+<div class="legend">
+  <span><i style="background:var(--teal)"></i><span data-i18n="lg_done"></span></span>
+  <span><i style="background:var(--exam)"></i><span data-i18n="lg_exam"></span></span>
+  <span><i style="background:var(--bg-2);border:2px solid var(--alt)"></i><span data-i18n="lg_alt"></span></span>
+</div>
+
+<aside id="panel" aria-live="polite"></aside>
+
+<section id="drawer" aria-label="Terminal">
+  <div class="bar">
+    <strong id="drawer-cmd"></strong>
+    <span id="drawer-links"></span>
+    <button id="drawer-close" data-i18n="close_term"></button>
+  </div>
+  <div class="panes">
+    <iframe id="term" title="Terminal"></iframe>
+    <iframe id="screen" class="screen" title="Screen" hidden></iframe>
+  </div>
+</section>
+
+<script>
+const I18N = {
+  fr: {
+    tagline: "Mes projets de l'école 42. Clique sur un projet pour le lancer : tout tourne dans Docker.",
+    fit: "Recentrer", stopall: "Tout arrêter", close_term: "Fermer",
+    lg_done: "validé", lg_exam: "examen", lg_alt: "option non choisie",
+    launch: "Lancer", code: "Code", team_repo: "Dépôt d'équipe", with: "Avec",
+    exam: "Examen", exam_desc: "Examen sur machine, sans internet, en temps limité : aucun code rendu.",
+    alt: "Option non choisie", alt_desc: "Projet au choix du cursus : j'ai pris l'autre branche à ce rang.",
+    nothing: "Rien à exécuter : le rendu se lit dans le dépôt.", screen: "Écran",
+    ring: r => r >= 7 ? "Hors tronc commun" : "Rang " + String(r).padStart(2, "0"),
+    reload_screen: "Recharger l'écran"
+  },
+  en: {
+    tagline: "My projects from 42 school. Click a project to run it: everything runs in Docker.",
+    fit: "Recenter", stopall: "Stop everything", close_term: "Close",
+    lg_done: "validated", lg_exam: "exam", lg_alt: "option not taken",
+    launch: "Run", code: "Code", team_repo: "Team repo", with: "With",
+    exam: "Exam", exam_desc: "Timed exam on a school machine without internet: no code submitted.",
+    alt: "Option not taken", alt_desc: "An elective of the cursus: I took the other branch at this rank.",
+    nothing: "Nothing to run: the deliverable is in the repo.", screen: "Screen",
+    ring: r => r >= 7 ? "Beyond the common core" : "Rank " + String(r).padStart(2, "0"),
+    reload_screen: "Reload screen"
+  }
+};
+const SCREEN_URL = "http://localhost:6080/vnc.html?autoconnect=1&resize=scale&reconnect=1";
+let lang = (() => { try { return localStorage.getItem("lang") || "fr"; } catch { return "fr"; } })();
+let DATA, GRAPH, selected = null;
+const t = k => I18N[lang][k];
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+// ---------------------------------------------------------------- graph
+
+function pos(n) {
+  const r = GRAPH.rings[n.ring], a = n.a * Math.PI / 180;
+  return [r * Math.cos(a), -r * Math.sin(a)];
+}
+
+function fitLabel(text, name, max) {
+  let size = 13;
+  text.textContent = name;
+  text.setAttribute("font-size", size);
+  while (text.getComputedTextLength() > max && size > 8) text.setAttribute("font-size", --size);
+}
+
+function draw() {
+  const world = $("#world");
+  world.innerHTML = "";
+  const byId = Object.fromEntries(GRAPH.nodes.map(n => [n.id, n]));
+  GRAPH.rings.forEach((r, i) => { if (r) el("circle", { r, class: "ring" + (i === GRAPH.rings.length - 1 ? " outer" : "") }, world); });
+  for (const n of GRAPH.nodes) for (const p of n.after || []) {
+    if (!byId[p]) continue;
+    const [x1, y1] = pos(byId[p]), [x2, y2] = pos(n);
+    el("line", { x1, y1, x2, y2, class: "edge" + (n.alt ? " dim" : "") }, world);
+  }
+  for (const n of GRAPH.nodes) {
+    const [x, y] = pos(n);
+    const kind = n.exam ? "exam" : n.alt ? "alt" : "done";
+    const g = el("g", { class: "node " + kind, transform: `translate(${x},${y})`, tabindex: 0, role: "button", "aria-label": n.name }, world);
+    g.dataset.id = n.id;
+    let text;
+    if (n.exam) {
+      el("rect", { x: -48, y: -13, width: 96, height: 26, rx: 13 }, g);
+      text = el("text", {}, g); fitLabel(text, n.name, 86);
+    } else {
+      const r = n.id === "libft" ? 46 : n.alt ? 30 : 38;
+      el("circle", { r }, g);
+      text = el("text", {}, g); fitLabel(text, n.name, r * 2 - 10);
+    }
+    g.addEventListener("click", e => { e.stopPropagation(); select(n.id); });
+    g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(n.id); } });
+  }
+}
+
+// ---------------------------------------------------------------- pan / zoom
+
+const view = { x: 0, y: 0, k: 1 };
+function apply() { $("#world").setAttribute("transform", `translate(${view.x},${view.y}) scale(${view.k})`); }
+function fit() {
+  const svg = $("#graph"), w = svg.clientWidth, h = svg.clientHeight;
+  const R = GRAPH.rings[GRAPH.rings.length - 1] + 60;
+  const freeW = $("#panel").classList.contains("open") && w > 700 ? w - 420 : w;
+  const freeH = document.body.classList.contains("running") ? h - Math.min(h * .58, 560) : h;
+  view.k = Math.min(freeW, freeH - 60) / (2 * R);
+  view.x = freeW / 2; view.y = 60 + (freeH - 60) / 2;
+  apply();
+}
+(function panzoom() {
+  const svg = $("#graph");
+  let drag = null;
+  svg.addEventListener("pointerdown", e => {
+    if (e.target.closest(".node")) return;
+    drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y, moved: false };
+    svg.setPointerCapture(e.pointerId); svg.classList.add("dragging");
+  });
+  svg.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+    view.x = drag.vx + dx; view.y = drag.vy + dy; apply();
+  });
+  svg.addEventListener("pointerup", () => {
+    if (drag && !drag.moved) closePanel();
+    drag = null; svg.classList.remove("dragging");
+  });
+  svg.addEventListener("wheel", e => {
+    e.preventDefault();
+    const f = Math.exp(-e.deltaY * 0.0015), k = Math.min(4, Math.max(0.2, view.k * f));
+    view.x = e.clientX - (e.clientX - view.x) * (k / view.k);
+    view.y = e.clientY - (e.clientY - view.y) * (k / view.k);
+    view.k = k; apply();
+  }, { passive: false });
+})();
+
+// ---------------------------------------------------------------- panel
+
+function argsOf(n, p) { return n.args || (p.run && p.run.args) || null; }
+
+function select(id) {
+  selected = id;
+  document.querySelectorAll(".node").forEach(g => g.classList.toggle("sel", g.dataset.id === id));
+  renderPanel();
+  $("#panel").classList.add("open");
+}
+function closePanel() {
+  selected = null;
+  document.querySelectorAll(".node.sel").forEach(g => g.classList.remove("sel"));
+  $("#panel").classList.remove("open");
+}
+
+function renderPanel() {
+  const n = GRAPH.nodes.find(x => x.id === selected);
+  if (!n) return;
+  const p = n.project && DATA.projects[n.project];
+  let html = `<button class="close" aria-label="close">✕</button>
+    <div class="kicker">${esc(t("ring")(n.ring))}</div><h2>${esc(n.name)}</h2>`;
+  if (!p) {
+    html += `<p class="desc">${esc(n.exam ? t("exam_desc") : t("alt_desc"))}</p>`;
+  } else {
+    html += `<p class="desc">${esc(p[lang])}</p><div class="tags">${p.stack.map(s => `<span>${esc(s)}</span>`).join("")}</div>`;
+    if (p.team) {
+      const people = p.team.map(l => `<a href="https://profile.intra.42.fr/users/${esc(l)}" target="_blank" rel="noopener">${esc(DATA.people[l] || l)}</a>`);
+      html += `<div class="team">${t("with")} ${people.join(", ")}</div>`;
+    }
+    const args = argsOf(n, p);
+    html += `<div class="actions">`;
+    if (args) html += `<button class="primary" id="run">▶ ${t("launch")}</button>`;
+    html += `<a class="btn" href="${DATA.repo}/tree/main/${esc(p.path)}" target="_blank" rel="noopener">${t("code")}</a>`;
+    if (p.origin) html += `<a class="btn" href="${esc(p.origin)}" target="_blank" rel="noopener">${t("team_repo")}</a>`;
+    html += `</div>`;
+    html += args ? `<code class="cmd">./cursus ${args.map(a => /\s/.test(a) ? `"${esc(a)}"` : esc(a)).join(" ")}</code>`
+                 : `<p class="team">${t("nothing")}</p>`;
+  }
+  $("#panel").innerHTML = html;
+  $("#panel .close").onclick = closePanel;
+  const run = $("#run");
+  if (run) run.onclick = () => launch(argsOf(n, p), p.run);
+}
+
+// ---------------------------------------------------------------- terminal
+
+function termUrl(args) { return "/term/?" + args.map(a => "arg=" + encodeURIComponent(a)).join("&"); }
+
+function launch(args, run = {}) {
+  document.body.classList.add("running");
+  $("#drawer").classList.add("open");
+  $("#drawer-cmd").textContent = "$ ./cursus " + args.join(" ");
+  $("#term").src = termUrl(args);
+  const links = $("#drawer-links");
+  links.innerHTML = "";
+  for (const [label, url] of run.urls || []) {
+    links.insertAdjacentHTML("beforeend", `<a class="btn" href="${esc(url)}" target="_blank" rel="noopener">${esc(label)} ↗</a> `);
+  }
+  const screen = $("#screen");
+  screen.hidden = !run.screen;
+  screen.src = "about:blank";
+  if (run.screen) {
+    links.insertAdjacentHTML("beforeend", `<button id="reload-screen">${t("reload_screen")}</button> <a class="btn" href="${SCREEN_URL}" target="_blank" rel="noopener">${t("screen")} ↗</a>`);
+    $("#reload-screen").onclick = () => { screen.src = SCREEN_URL; };
+    // le programme compile d'abord : on attend que l'ecran virtuel soit en place
+    setTimeout(() => { if (!screen.hidden) screen.src = SCREEN_URL; }, 9000);
+  }
+  fit();
+}
+
+function closeDrawer() {
+  $("#term").src = "about:blank";          // ferme la session : ttyd arrete le programme
+  $("#screen").src = "about:blank";
+  $("#drawer").classList.remove("open");
+  document.body.classList.remove("running");
+  fit();
+}
+
+// ---------------------------------------------------------------- i18n / boot
+
+function translate() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(e => { e.textContent = t(e.dataset.i18n); });
+  $("#lang").textContent = lang === "fr" ? "EN" : "FR";
+  if (selected) renderPanel();
+}
+
+$("#lang").onclick = () => { lang = lang === "fr" ? "en" : "fr"; try { localStorage.setItem("lang", lang); } catch {} translate(); };
+$("#fit").onclick = fit;
+$("#stopall").onclick = () => launch(["stop-all"]);
+$("#drawer-close").onclick = closeDrawer;
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePanel(); });
+window.addEventListener("resize", fit);
+
+Promise.all([fetch("projects.json").then(r => r.json()), fetch("graph.json").then(r => r.json())])
+  .then(([d, g]) => { DATA = d; GRAPH = g; translate(); draw(); fit(); });
+</script>
+</body>
+</html>
