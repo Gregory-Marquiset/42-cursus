@@ -42,14 +42,14 @@ affiche ce qu'il fait et avec qui je l'ai réalisé ; le bouton **Lancer** l'ex�
 
 ### Réalisés avec
 
-- **minishell** avec [Jérôme Portier](https://profile.intra.42.fr/users/jeportie) (jeportie)
-- **cub3D** avec [Charles-Louis Dutel](https://profile.intra.42.fr/users/cdutel) (cdutel)
-- **webserv** avec [Charles-Louis Dutel](https://profile.intra.42.fr/users/cdutel) (cdutel) et
-  [Marie Langlois](https://profile.intra.42.fr/users/malanglo) (malanglo)
-- **ft_transcendence** avec [Charles-Louis Dutel](https://profile.intra.42.fr/users/cdutel) (cdutel),
-  [Lou Briottet](https://profile.intra.42.fr/users/lobriott) (lobriott),
-  [Mathieu Da Cunha](https://profile.intra.42.fr/users/mda-cunh) (mda-cunh) et
-  [Liam Zaengel](https://profile.intra.42.fr/users/lzaengel) (lzaengel)
+- **minishell** avec [Jérôme Portier](https://github.com/jeportie) (jeportie)
+- **cub3D** avec [Charles-Louis Dutel](https://github.com/Charles-Louis-Dutel) (cdutel)
+- **webserv** avec [Charles-Louis Dutel](https://github.com/Charles-Louis-Dutel) (cdutel) et
+  [Marie Langlois](https://github.com/mlanglois26) (malanglo)
+- **ft_transcendence** avec [Charles-Louis Dutel](https://github.com/Charles-Louis-Dutel) (cdutel),
+  [Lou Briottet](https://github.com/loubrtt) (lobriott),
+  [Mathieu Da Cunha](https://github.com/Me-mathix) (mda-cunh) et
+  [Liam Zaengel](https://github.com/fliam25) (lzaengel)
 
 Les projets d'équipe gardent leur propre dépôt, avec tout l'historique et les commits de chacun :
 [mcg_webserv](https://github.com/Gregory-Marquiset/mcg_webserv),
@@ -98,6 +98,10 @@ Tout ce que fait la page existe aussi depuis un terminal :
   chemin que connaît le daemon (`/run/desktop/mnt/host/c/...` avec Docker Desktop sous Windows,
   le même chemin ailleurs) : les conteneurs et les fichiers compose qu'il lance résolvent donc
   correctement leurs montages.
+- **Mode jeu pour cub3D.** noVNC n'envoie que des positions absolues, ce qui casse un jeu qui
+  recentre la souris à chaque image. La page capture la souris (Pointer Lock) et envoie des
+  déplacements relatifs à un petit pont dans le conteneur ([`launcher/input-bridge.py`](launcher/input-bridge.py)),
+  qui les injecte dans X par XTest.
 - **Les secrets sont générés, jamais versionnés.** Mots de passe d'Inception, `.env` et
   certificat auto-signé de Cloud-1 : créés au premier lancement, ignorés par git.
 - **Une stack à la fois.** Inception et Cloud-1 écoutent toutes deux sur le 443 : démarrer
@@ -121,5 +125,5 @@ Le code est celui rendu en évaluation. Ce qu'il faut pour le lancer ailleurs se
 - Docker avec le plugin compose (Docker Desktop sous Windows et macOS)
 - bash : Linux, macOS, WSL, ou Git Bash sous Windows
 
-Ports : 4242 (portail), 6080 (écran virtuel), 1045 (webserv), 443, 9443, 21 et 30000-30009
+Ports : 4242 (portail), 6080-6081 (écran virtuel, mode jeu), 1045 (webserv), 443, 9443, 21 et 30000-30009
 (Inception), 80 et 443 (Cloud-1), 8000, 8001, 8080, 3000, 9090 et 8200 (ft_transcendence).

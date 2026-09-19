@@ -144,7 +144,7 @@ run_minishell() {
 # fdf / cub3d : MiniLibX dans un ecran virtuel, affiche dans le navigateur par noVNC
 run_gui() {
     local prj="$1" bin="$2" arg="$3"
-    DOCKER_ARGS=(-p 127.0.0.1:6080:6080 -v "$(host_path "$ROOT/launcher"):/launcher:ro")
+    DOCKER_ARGS=(-p 127.0.0.1:6080:6080 -p 127.0.0.1:6081:6081 -v "$(host_path "$ROOT/launcher"):/launcher:ro")
     info "$prj s'affiche dans le navigateur : ${B}http://localhost:6080/vnc.html?autoconnect=1&resize=scale${N}"
     info "Ctrl+C ici pour arreter"
     in_box "$P/$prj" "make -s ${4:-} >/dev/null 2>&1 || make ${4:-}; exec sh /launcher/gui.sh ./$bin \"\$@\"" "$arg"

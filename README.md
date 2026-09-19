@@ -42,14 +42,14 @@ does and who I built it with, then hit **Run**:
 
 ### Built with
 
-- **minishell** with [Jérôme Portier](https://profile.intra.42.fr/users/jeportie) (jeportie)
-- **cub3D** with [Charles-Louis Dutel](https://profile.intra.42.fr/users/cdutel) (cdutel)
-- **webserv** with [Charles-Louis Dutel](https://profile.intra.42.fr/users/cdutel) (cdutel) and
-  [Marie Langlois](https://profile.intra.42.fr/users/malanglo) (malanglo)
-- **ft_transcendence** with [Charles-Louis Dutel](https://profile.intra.42.fr/users/cdutel) (cdutel),
-  [Lou Briottet](https://profile.intra.42.fr/users/lobriott) (lobriott),
-  [Mathieu Da Cunha](https://profile.intra.42.fr/users/mda-cunh) (mda-cunh) and
-  [Liam Zaengel](https://profile.intra.42.fr/users/lzaengel) (lzaengel)
+- **minishell** with [Jérôme Portier](https://github.com/jeportie) (jeportie)
+- **cub3D** with [Charles-Louis Dutel](https://github.com/Charles-Louis-Dutel) (cdutel)
+- **webserv** with [Charles-Louis Dutel](https://github.com/Charles-Louis-Dutel) (cdutel) and
+  [Marie Langlois](https://github.com/mlanglois26) (malanglo)
+- **ft_transcendence** with [Charles-Louis Dutel](https://github.com/Charles-Louis-Dutel) (cdutel),
+  [Lou Briottet](https://github.com/loubrtt) (lobriott),
+  [Mathieu Da Cunha](https://github.com/Me-mathix) (mda-cunh) and
+  [Liam Zaengel](https://github.com/fliam25) (lzaengel)
 
 The team projects keep their own repositories, with the full history and everyone's commits:
 [mcg_webserv](https://github.com/Gregory-Marquiset/mcg_webserv),
@@ -98,6 +98,10 @@ Everything in the web page is also available from a terminal:
   at the path the Docker daemon knows (`/run/desktop/mnt/host/c/...` on Docker Desktop for
   Windows, the same path elsewhere), so the containers and compose files it starts resolve
   their bind mounts correctly.
+- **Game mode for cub3D.** noVNC only sends absolute pointer positions, which breaks a game that
+  re-centres the mouse every frame. The page captures the mouse (Pointer Lock) and sends relative
+  moves to a small bridge in the container ([`launcher/input-bridge.py`](launcher/input-bridge.py)),
+  which injects them into X with XTest.
 - **Secrets are generated, never committed.** Inception's passwords, Cloud-1's `.env` and
   self-signed certificate are created on first run and ignored by git.
 - **One stack at a time.** Inception and Cloud-1 both listen on 443, so starting one stops
@@ -121,5 +125,5 @@ The code is what was submitted for evaluation. Anything needed to run it elsewhe
 - Docker with the compose plugin (Docker Desktop on Windows and macOS)
 - bash: Linux, macOS, WSL, or Git Bash on Windows
 
-Ports: 4242 (portal), 6080 (virtual screen), 1045 (webserv), 443, 9443, 21 and 30000-30009
+Ports: 4242 (portal), 6080-6081 (virtual screen, game mode), 1045 (webserv), 443, 9443, 21 and 30000-30009
 (Inception), 80 and 443 (Cloud-1), 8000, 8001, 8080, 3000, 9090 and 8200 (ft_transcendence).

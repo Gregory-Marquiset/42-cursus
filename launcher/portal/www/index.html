@@ -100,14 +100,19 @@
   #drawer .bar strong { margin-right: auto; font: 13px var(--mono); color: var(--muted); }
   #drawer .panes { flex: 1; display: flex; min-height: 0; }
   #drawer iframe { border: 0; flex: 1; min-width: 0; background: var(--bg); }
-  #drawer iframe.screen { flex: 1.6; border-left: 1px solid var(--line); background: #000; }
+  #drawer .screen { flex: 1.6; min-width: 0; display: flex; position: relative; border-left: 1px solid var(--line); background: #000; }
+  #drawer .screen[hidden] { display: none; }
+  #game { position: absolute; inset: 0; cursor: none; display: flex; align-items: flex-start; justify-content: center; }
+  #game[hidden] { display: none; }
+  #game span { margin-top: 10px; font-size: 12px; color: #fff; background: rgba(11, 16, 32, .75); border: 1px solid var(--teal); border-radius: 99px; padding: 3px 12px; }
+  #game.locked span { opacity: .6; }
   body.running aside { bottom: min(58vh, 560px); }
 
   @media (max-width: 700px) {
     .brand p { display: none; }
     aside { top: auto; height: 62vh; width: 100%; border-left: 0; border-top: 1px solid var(--line); transform: translateY(100%); }
     #drawer .panes { flex-direction: column; }
-    #drawer iframe.screen { border-left: 0; border-top: 1px solid var(--line); }
+    #drawer .screen { border-left: 0; border-top: 1px solid var(--line); }
     .legend { display: none; }
   }
 </style>
@@ -143,7 +148,10 @@
   </div>
   <div class="panes">
     <iframe id="term" title="Terminal"></iframe>
-    <iframe id="screen" class="screen" title="Screen" hidden></iframe>
+    <div id="screen-wrap" class="screen" hidden>
+      <iframe id="screen" title="Screen"></iframe>
+      <div id="game" hidden><span id="game-hint"></span></div>
+    </div>
   </div>
 </section>
 
@@ -158,7 +166,8 @@ const I18N = {
     alt: "Option non choisie", alt_desc: "Projet au choix du cursus : j'ai pris l'autre branche à ce rang.",
     nothing: "Rien à exécuter : le rendu se lit dans le dépôt.", screen: "Écran",
     ring: r => r >= 7 ? "Hors tronc commun" : "Rang " + String(r).padStart(2, "0"),
-    reload_screen: "Recharger l'écran"
+    reload_screen: "Recharger l'écran",
+    game: "Mode jeu", game_hint: "Souris capturée — Échap pour la libérer"
   },
   en: {
     tagline: "My projects from 42 school. Click a project to run it: everything runs in Docker.",
@@ -169,7 +178,8 @@ const I18N = {
     alt: "Option not taken", alt_desc: "An elective of the cursus: I took the other branch at this rank.",
     nothing: "Nothing to run: the deliverable is in the repo.", screen: "Screen",
     ring: r => r >= 7 ? "Beyond the common core" : "Rank " + String(r).padStart(2, "0"),
-    reload_screen: "Reload screen"
+    reload_screen: "Reload screen",
+    game: "Game mode", game_hint: "Mouse captured — Esc to release"
   }
 };
 const SCREEN_URL = "http://localhost:6080/vnc.html?autoconnect=1&resize=scale&reconnect=1";
@@ -296,7 +306,7 @@ function renderPanel() {
   } else {
     html += `<p class="desc">${esc(p[lang])}</p><div class="tags">${p.stack.map(s => `<span>${esc(s)}</span>`).join("")}</div>`;
     if (p.team) {
-      const people = p.team.map(l => `<a href="https://profile.intra.42.fr/users/${esc(l)}" target="_blank" rel="noopener">${esc(DATA.people[l] || l)}</a>`);
+      const people = p.team.map(l => { const u = DATA.people[l] || { name: l }; return `<a href="https://github.com/${esc(u.github || l)}" target="_blank" rel="noopener">${esc(u.name)}</a>`; });
       html += `<div class="team">${t("with")} ${people.join(", ")}</div>`;
     }
     const args = argsOf(n, p);
@@ -329,18 +339,77 @@ function launch(args, run = {}) {
     links.insertAdjacentHTML("beforeend", `<a class="btn" href="${esc(url)}" target="_blank" rel="noopener">${esc(label)} ↗</a> `);
   }
   const screen = $("#screen");
-  screen.hidden = !run.screen;
+  $("#screen-wrap").hidden = !run.screen;
   screen.src = "about:blank";
   if (run.screen) {
+    if (run.mouselook) links.insertAdjacentHTML("beforeend", `<button class="primary" id="game-on">🎮 ${t("game")}</button> `);
     links.insertAdjacentHTML("beforeend", `<button id="reload-screen">${t("reload_screen")}</button> <a class="btn" href="${SCREEN_URL}" target="_blank" rel="noopener">${t("screen")} ↗</a>`);
     $("#reload-screen").onclick = () => { screen.src = SCREEN_URL; };
+    if (run.mouselook) $("#game-on").onclick = gameOn;
     // le programme compile d'abord : on attend que l'ecran virtuel soit en place
-    setTimeout(() => { if (!screen.hidden) screen.src = SCREEN_URL; }, 9000);
+    setTimeout(() => { if (!$("#screen-wrap").hidden) screen.src = SCREEN_URL; }, 9000);
   }
   fit();
 }
 
+// ---------------------------------------------------------------- mode jeu
+// noVNC n'envoie que des positions absolues : un jeu qui recentre la souris (cub3d) tourne
+// sans fin. Ici la page capture la souris (Pointer Lock) et le clavier, et envoie des
+// deplacements relatifs au pont du conteneur (launcher/input-bridge.py), qui les injecte dans X.
+
+const BRIDGE_URL = "ws://localhost:6081";
+const game = { ws: null, dx: 0, dy: 0, raf: 0 };
+const X_KEYS = { Space: "space", ArrowLeft: "Left", ArrowRight: "Right", ArrowUp: "Up", ArrowDown: "Down",
+  ShiftLeft: "Shift_L", ShiftRight: "Shift_R", ControlLeft: "Control_L", Enter: "Return", Tab: "Tab", Backspace: "BackSpace" };
+// touche physique (e.code) : WASD reste WASD en AZERTY, comme dans un jeu
+function xKey(code) {
+  if (/^Key[A-Z]$/.test(code)) return code.slice(3).toLowerCase();
+  if (/^Digit[0-9]$/.test(code)) return code.slice(5);
+  return X_KEYS[code];
+}
+function send(line) {
+  if (game.ws && game.ws.readyState === 1) game.ws.send(new TextEncoder().encode(line + "\n"));
+}
+function gameOn() {
+  const layer = $("#game");
+  layer.hidden = false;
+  $("#game-hint").textContent = t("game_hint");
+  if (!game.ws || game.ws.readyState > 1) game.ws = new WebSocket(BRIDGE_URL, ["binary"]);
+  layer.requestPointerLock();
+}
+function gameOff() {
+  $("#game").hidden = true;
+  $("#game").classList.remove("locked");
+  if (document.pointerLockElement) document.exitPointerLock();
+}
+document.addEventListener("pointerlockchange", () => {
+  const locked = document.pointerLockElement === $("#game");
+  $("#game").classList.toggle("locked", locked);
+  if (!locked) gameOff();
+});
+// deplacements cumules et envoyes une fois par image
+$("#game").addEventListener("mousemove", e => {
+  if (document.pointerLockElement !== e.currentTarget) return;
+  game.dx += e.movementX; game.dy += e.movementY;
+  if (!game.raf) game.raf = requestAnimationFrame(() => {
+    if (game.dx || game.dy) send(`m ${Math.round(game.dx)} ${Math.round(game.dy)}`);
+    game.dx = game.dy = game.raf = 0;
+  });
+});
+$("#game").addEventListener("mousedown", e => send(`b 1 ${e.button + 1}`));
+$("#game").addEventListener("mouseup", e => send(`b 0 ${e.button + 1}`));
+for (const type of ["keydown", "keyup"]) {
+  document.addEventListener(type, e => {
+    if (document.pointerLockElement !== $("#game") || e.repeat) return;
+    const k = xKey(e.code);
+    if (!k) return;
+    e.preventDefault();
+    send(`k ${type === "keydown" ? 1 : 0} ${k}`);
+  });
+}
+
 function closeDrawer() {
+  gameOff();
   $("#term").src = "about:blank";          // ferme la session : ttyd arrete le programme
   $("#screen").src = "about:blank";
   $("#drawer").classList.remove("open");
