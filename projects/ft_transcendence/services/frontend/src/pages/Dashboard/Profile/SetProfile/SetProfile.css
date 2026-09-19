@@ -1,0 +1,33 @@
+.personal-infos{
+    align-items: center;
+    white-space: pre;
+    display: flex;
+    flex-direction: column;
+    width: 700px;
+    height : 500px;
+    transition: all 300ms;
+    border-radius: 50px;
+    color: black;
+    border: #eab2bb solid 10px;
+    background-color: rgba(255, 255, 255, 0.639);
+}
+
+input{
+    border : solid #eab2bb 3px;
+    border-radius: 10px;
+    white-space: pre;
+    margin: 10px;
+    size : 30px;
+    /* color: red; */
+}
+
+.input-data{
+    font-size: 20px;
+    padding-top: 20px;
+}
+
+hr{
+    border: 0;
+    border-top: solid 10px #eab2bb;
+    margin : 7px 0;
+}

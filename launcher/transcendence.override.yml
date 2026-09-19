@@ -1,0 +1,9 @@
+# Surcharge utilisee par ./cursus : `backup` est un service ponctuel (lance par `make backup`),
+# il sort aussitot et ferait echouer `docker compose up --wait`. Le profil l'exclut du `up`.
+services:
+  backup:
+    profiles: ["tools"]
+  # adminer:latest n'a plus de binaire `php` (renomme php82) : healthcheck d'origine casse
+  adminer:
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080 >/dev/null || exit 1"]

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+
+		<meta charset="UTF-8">
+		<title>Webserv Testeur</title>
+		<link rel="stylesheet" href="css/style.css">
+		<script src="js/session.js" defer></script>
+		<script src="js/theme.js" defer></script>
+		<script src="js/tester.js" defer></script>
+
+	</head>
+	<body>
+
+		<div id="session-info" class="fixed-top-buttons-right">
+			<p>Session ID : <strong id="sessionid-display">inconnu</strong></p>
+			<p>Utilisateur : <strong id="username-display">inconnu</strong></p>
+			<p>Status : <strong id="status-display">inconnu</strong></p>
+			<p>Email : <strong id="email-display">inconnu</strong></p>
+			<p>Password : <strong id="password-display">inconnu</strong></p>
+			<p>Theme : <strong id="theme-display">inconnu</strong></p>
+		</div>
+
+		<div class="fixed-top-buttons-left">
+			<a href="index.html" title="Home">🏠</a>
+		</div>
+
+		<h1>Webserv Testeur</h1>
+		<div class="section">
+			<h2>Envoyer une requête HTTP</h2>
+			<form id="httpForm">
+				<label>URL relative :</label>
+				<input type="text" id="url" value="/" required />
+
+				<label>Méthode :</label>
+				<select id="method">
+					<option>GET</option>
+					<option>POST</option>
+					<option>DELETE</option>
+				</select>
+
+				<label>Corps (pour POST) :</label>
+				<textarea id="body" rows="4"></textarea>
+
+				<button type="submit">Envoyer</button>
+			</form>
+			<div id="result"></div>
+		</div>
+
+		<div class="section">
+			<h2>Test GET CGI</h2>
+			<button onclick="sendRequest('/cgi_tester/test_timeout.py')">CGI Timeout</button>
+			<button onclick="sendRequest('/cgi_tester/test.js')">CGI JS</button>
+			<button onclick="sendRequest('/cgi_tester/test.pl')">CGI Perl</button>
+			<button onclick="sendRequest('/cgi_tester/test.py')">CGI Python</button>
+
+			<h2>Test POST CGI</h2>
+			<form id="postCgiForm">
+				<label>Nom de fichier à créer :</label>
+				<input type="text" id="filename-post" name="filename" required />
+				<label>Contenu du fichier :</label>
+				<textarea id="content-post" name="content" rows="4"></textarea>
+				<button type="submit">Créer fichier</button>
+			</form>
+
+			<h2>Cookies / Session</h2>
+			<button onclick="showCookies()">Afficher les cookies</button>
+			<div id="cookies"></div>
+
+			<h2>Upload file(s)</h2>
+			<form id="uploadForm">
+				<input type="file" id="fileInput" name="files" multiple>
+				<button type="submit">Envoyer fichier(s) (POST)</button>
+			</form>
+
+			<h2>Logs de requête/réponse</h2>
+			<div id="log"></div>
+		</div>
+
+		<script>
+			window.addEventListener("DOMContentLoaded", () =>
+			{
+				loadSessionData();
+			});
+		</script>
+
+	</body>
+</html>

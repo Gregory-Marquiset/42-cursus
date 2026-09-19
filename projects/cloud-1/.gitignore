@@ -1,0 +1,19 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+crash.log
+
+# Variables locales
+*.auto.tfvars
+terraform.tfvars
+
+# Ansible Vault
+.vault-pass
+
+# nginx
+docker/.env
+docker/certs/
+
+# Secrets Ansible
+ansible/group_vars/*/secrets.yml

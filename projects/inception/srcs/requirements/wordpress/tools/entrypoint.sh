@@ -1,0 +1,125 @@
+#!/usr/bin/env sh
+set -euo pipefail
+
+read_secret() {
+  var="$1"
+  file_var="${var}_FILE"
+
+  v="$(printenv "$var" 2>/dev/null || true)"
+  fv="$(printenv "$file_var" 2>/dev/null || true)"
+
+  if [ -n "$fv" ] && [ -z "$v" ]; then
+    export "$var"="$(cat "$fv")"
+    unset "$file_var"
+  fi
+}
+
+read_secret MYSQL_PASSWORD
+read_secret WP_ADMIN_PASSWORD
+read_secret WP_REDIS_PASSWORD
+
+: "${DOMAIN_NAME:=localhost}"
+: "${MYSQL_HOST:=mariadb}"
+: "${MYSQL_PORT:=3306}"
+: "${MYSQL_DATABASE:=wordpress}"
+: "${MYSQL_USER:=wpuser}"
+
+: "${WP_URL:=https://${DOMAIN_NAME}}"
+: "${WP_TITLE:=Inception WP}"
+: "${WP_ADMIN_USER:=admin}"
+: "${WP_ADMIN_EMAIL:=admin@example.com}"
+
+: "${REDIS_HOST:=redis}"
+: "${ENABLE_REDIS:=1}"
+
+cd /var/www/html
+
+umask 0002
+if [ ! -f wp-includes/version.php ]; then
+  echo "[wp] Downloading WordPress core..."
+  curl -fsSLo /tmp/wp.tar.gz --retry 5 --retry-delay 2 https://wordpress.org/latest.tar.gz
+  mkdir -p wp-content wp-content/plugins wp-content/themes wp-content/upgrade
+  tar -xzf /tmp/wp.tar.gz --strip-components=1 -C .
+  rm -f /tmp/wp.tar.gz
+fi
+
+echo "[wp] Waiting for MariaDB at ${MYSQL_HOST}:${MYSQL_PORT}..."
+php82 -r '
+$h=getenv("MYSQL_HOST"); $u=getenv("MYSQL_USER"); $p=getenv("MYSQL_PASSWORD"); $d=getenv("MYSQL_DATABASE"); $port=(int)getenv("MYSQL_PORT");
+for ($i=0; $i<60; $i++) { $m=@new mysqli($h,$u,$p,$d,$port); if(!$m->connect_errno){$m->close(); exit(0);} sleep(1); }
+fwrite(STDERR,"Database not reachable.\n"); exit(1);
+'
+
+if [ ! -f wp-config.php ]; then
+  echo "[wp] Creating wp-config.php..."
+  wp config create \
+    --dbname="$MYSQL_DATABASE" \
+    --dbuser="$MYSQL_USER" \
+    --dbpass="$MYSQL_PASSWORD" \
+    --dbhost="${MYSQL_HOST}:${MYSQL_PORT}" \
+    --skip-check \
+    --force \
+    --allow-root
+  wp config set WP_CACHE true --type=constant --allow-root || true
+  wp config set FS_METHOD direct --type=constant --allow-root
+  wp config shuffle-salts --allow-root
+
+  if [ "$ENABLE_REDIS" = "1" ]; then
+    wp config set WP_REDIS_HOST "$REDIS_HOST" --type=constant --allow-root
+    wp config set WP_REDIS_CLIENT "phpredis" --type=constant --allow-root
+  fi
+fi
+
+if [ -n "${WP_REDIS_PASSWORD:-}" ]; then
+  wp config set WP_REDIS_PASSWORD "$WP_REDIS_PASSWORD" --type=constant --allow-root
+fi
+if [ -n "${WP_REDIS_PORT:-}" ]; then
+  wp config set WP_REDIS_PORT "$WP_REDIS_PORT" --type=constant --allow-root
+fi
+
+if ! wp core is-installed --allow-root >/dev/null 2>&1; then
+  echo "[wp] Installing WordPress (DB empty)..."
+  wp core install \
+    --url="$WP_URL" \
+    --title="$WP_TITLE" \
+    --admin_user="$WP_ADMIN_USER" \
+    --admin_password="$WP_ADMIN_PASSWORD" \
+    --admin_email="$WP_ADMIN_EMAIL" \
+    --skip-email \
+    --allow-root
+fi
+
+if ! wp user get "$WP_ADMIN_USER" --field=ID --allow-root >/dev/null 2>&1; then
+  wp user create "$WP_ADMIN_USER" "$WP_ADMIN_EMAIL" \
+    --role=administrator --user_pass="$WP_ADMIN_PASSWORD" --allow-root
+elif [ "${WP_FORCE_ADMIN_PASSWORD:-0}" = "1" ]; then
+  wp user update "$WP_ADMIN_USER" --user_pass="$WP_ADMIN_PASSWORD" --allow-root
+fi
+
+wp option update home "$WP_URL" --allow-root
+wp option update siteurl "$WP_URL" --allow-root
+
+if [ "${ENABLE_REDIS:-1}" = "1" ]; then
+  REDIS_PORT="${REDIS_PORT:-6379}"
+
+  if php82 -r '
+    $h=getenv("REDIS_HOST")?: "redis";
+    $p=(int)(getenv("REDIS_PORT")?:6379);
+    $t=2; $errno=0; $err="";
+    $s=@fsockopen($h,$p,$errno,$err,$t);
+    if ($s) { fclose($s); exit(0); } exit(1);
+  '; then
+    wp plugin install redis-cache --activate --allow-root || true
+    wp redis enable --allow-root || true
+    echo "[wp] Redis détecté: extension activée."
+  else
+    echo "[wp] Redis indisponible, on n’active pas le cache (pas d’erreur)."
+  fi
+fi
+
+if [ "$(id -u)" -eq 0 ]; then
+  chown -R www:www /var/www/html
+fi
+
+echo "[wp] Starting php-fpm82..."
+exec php-fpm82 -F

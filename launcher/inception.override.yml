@@ -1,0 +1,7 @@
+# Surcharge utilisee par ./cursus : le sujet impose des volumes lies a /home/<login>/data,
+# chemin qui n'existe pas hors de la VM d'evaluation. On garde des volumes nommes classiques.
+volumes:
+  wordpress_volume:
+    driver_opts: !reset {}
+  mariadb_volume:
+    driver_opts: !reset {}

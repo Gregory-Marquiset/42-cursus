@@ -1,0 +1,587 @@
+
+
+.content-container {
+    text-align: start;
+    font-size: 40px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    /* left: 400px; */
+    margin: 30px;
+    padding: 20px;
+    border: solid 7px #858585;
+    border-radius: 5%;
+    background: linear-gradient(
+        180deg,
+        #faf7f8 0%,
+        #f3eef0 100%
+    );
+    color: black;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: clamp(18px, 3vw, 32px);
+    min-height: auto;
+    white-space: normal;
+    z-index: 400;
+}
+
+.content-container {
+    flex: 1;
+    min-width: 0;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+}
+.weekly-graph h3 {
+    font-size: 30px;
+    font-weight: 250;
+    margin: 0 0 10px 0;
+    flex-shrink: 0;
+}
+
+.chart-wrapper {
+    flex: 1;
+    min-height: 0;
+}
+
+@media (max-width: 900px) {
+    .module-container {
+        flex-direction: column;
+    }
+}
+
+.todo-summary {
+    border: 2px solid #eab2bb;
+    font-size: clamp(18px, 3vw, 35px);
+    background-color: #ffffff48;
+    border-radius: 10px;
+    margin: 10px;
+    min-height: 200px;
+    text-align: left;
+    padding: 10px;
+    flex: 1;
+    min-width: 250px;
+    overflow-y: auto;
+    max-height: 600px;
+}
+
+.todo-summary h3 {
+    font-size: clamp(20px, 3vw, 25px);
+    font-weight: 250;
+}
+
+.topxp-summary{
+    flex: 1;
+    border: 2px solid #eab2bb;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    background-color: #cacaca48;
+    transition: all 300ms;
+   
+    padding-top: 10px;
+    /* font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; */
+}
+
+.topxp-summary h3 {
+    font-size: 25px;
+    font-weight: 250;
+    white-space: pre;
+}
+
+
+.streak-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.streak-number.zero {
+    color: #ccc;
+}
+
+.streak-days {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.day-label {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: #999;
+    background: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.day-label.active {
+    color: #eab2bb;
+    border-color: #eab2bb;
+    background: #fff5f7;
+}
+
+.todo {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    text-align: start;
+    border: 2px solid #eab2bb;
+    margin: 10px;
+    border-radius: 10px;
+    transition: all 300ms;
+    padding: 10px;
+    overflow: hidden; /* Empêche le débordement */
+}
+
+.todo:hover {
+    background-color: white;
+    box-shadow: 0 8px 10px #eab2bb;
+}
+
+.todo-description {
+    font-size: clamp(14px, 2.5vw, 17px);
+    margin-left: 5px;
+    font-weight: 200;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limite à 2 lignes */
+    -webkit-box-orient: vertical;
+}
+
+.todo-title {
+    font-size: clamp(20px, 4vw, 30px);
+    margin-top: 5px;
+    margin-left: 10px;
+    font-weight: 500;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    max-width: 100%;
+}
+
+.checkbox-wrapper-5 .check {
+--size: 30px;
+position: relative;
+background: linear-gradient(90deg, #eab2bb, rgb(250, 150, 182));
+line-height: 0;
+perspective: 400px;
+font-size: var(--size);
+}
+
+.checkbox-wrapper-5 .check input[type="checkbox"],
+.checkbox-wrapper-5 .check label,
+.checkbox-wrapper-5 .check label::before,
+.checkbox-wrapper-5 .check label::after,
+.checkbox-wrapper-5 .check {
+    appearance: none;
+    display: inline-block;
+    border-radius: var(--size);
+    border: 0;
+    transition: .35s ease-in-out;
+    box-sizing: border-box;
+    cursor: pointer;
+    position: relative;
+}
+
+.checkbox-wrapper-5 .check label {
+    width: calc(2.2 * var(--size));
+    height: var(--size);
+    background: #d7d7d7;
+    overflow: hidden;
+}
+
+.checkbox-wrapper-5 .check input[type="checkbox"] {
+position: absolute;
+z-index: 1;
+width: calc(.8 * var(--size));
+height: calc(.8 * var(--size));
+top: calc(.1 * var(--size));
+left: calc(.1 * var(--size));
+background: linear-gradient(45deg, #dedede, #ffffff);
+box-shadow: 0 6px 7px rgba(0,0,0,0.3);
+outline: none;
+margin: 0;
+}
+
+.checkbox-wrapper-5 .check input[type="checkbox"]:checked {
+left: calc(1.3 * var(--size));
+}
+
+.checkbox-wrapper-5 .check input[type="checkbox"]:checked + label {
+background: transparent;
+}
+
+.checkbox-wrapper-5 .check label::before,
+.checkbox-wrapper-5 .check label::after {
+content: "· ·";
+position: absolute;
+overflow: hidden;
+left: calc(.15 * var(--size));
+top: calc(.5 * var(--size));
+height: var(--size);
+letter-spacing: calc(-0.04 * var(--size));
+color: #9b9b9b;
+font-family: "Times New Roman", serif;
+z-index: 2;
+font-size: calc(.6 * var(--size));
+border-radius: 0;
+transform-origin: 0 0 calc(-0.5 * var(--size));
+backface-visibility: hidden;
+}
+
+.checkbox-wrapper-5 .check label::after {
+content: "●";
+top: calc(.65 * var(--size));
+left: calc(.2 * var(--size));
+height: calc(.1 * var(--size));
+width: calc(.35 * var(--size));
+font-size: calc(.2 * var(--size));
+transform-origin: 0 0 calc(-0.4 * var(--size));
+}
+
+.checkbox-wrapper-5 .check input[type="checkbox"]:checked + label::before,
+.checkbox-wrapper-5 .check input[type="checkbox"]:checked + label::after {
+left: calc(1.55 * var(--size));
+top: calc(.4 * var(--size));
+line-height: calc(.1 * var(--size));
+transform: rotateY(360deg);
+}
+
+.checkbox-wrapper-5 .check input[type="checkbox"]:checked + label::after {
+height: calc(.16 * var(--size));
+top: calc(.55 * var(--size));
+left: calc(1.6 * var(--size));
+font-size: calc(.6 * var(--size));
+line-height: 0;
+}
+
+.friend-ranked{
+    margin: 10px;
+    border: #858585 solid 2px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    background-color: whitesmoke;
+    transition: all 300ms;
+}
+
+.friend-ranked:hover{
+    background-color: white;
+    box-shadow: 0 8px 10px #eab2bb;
+    .rank-badge{
+        scale : 1.15;
+    }
+    .avatar-xp {
+        scale : 1.15;
+    }
+}
+
+.avatar-xp{
+    border-radius: 50px;
+    width: 80px;
+    height: 80px;
+    border: #eab2bb solid 4px;
+    border-radius: 50px;
+    margin: 10px;
+    transition: all 300ms;
+}
+.friend-name{
+    font-size: 30px;
+    margin-top: 8px;
+}
+
+.xp-ranked{
+    font-size: 20px;
+}
+.text-xp-container{
+    display: flex;
+    flex-direction: column;
+}
+
+.rank-badge{
+    width: 60px;
+    transition: all 300ms;
+    right : 50px;
+}
+
+.weekly-graph,
+.streaks,
+.topxp-summary,
+.todo,
+.friend-ranked{
+    background-color: #ffffffc2;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+
+
+/* Améliorations pour le weekly-graph */
+.weekly-graph {
+    min-height: 250px;
+    height: auto;
+    margin: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid #eab2bb;
+    border-radius: 10px;
+    padding: 15px;
+    background: white;
+}
+
+
+.chart-wrapper {
+    flex: 1;
+    min-height: 200px;
+    width: 100%;
+}
+
+/* Améliorations pour les streaks */
+.streaks {
+    margin: 20px;
+    margin-left: 10px;
+    border: 2px solid #eab2bb;
+    border-radius: 10px;
+    flex: 1;
+    min-width: 250px;
+    max-width: 350px;
+    padding: 15px;
+    background-color: white;
+    position: relative;
+    text-align: center;
+    min-height: 250px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.streaks h3 {
+    font-size: clamp(20px, 4vw, 25px);
+    font-weight: 250;
+    white-space: pre;
+    margin: 0 0 10px 0;
+    flex-shrink: 0;
+}
+
+.streak-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+    flex: 1;
+}
+
+.streak-number {
+    font-size: clamp(36px, 8vw, 48px);
+    font-weight: bold;
+    color: #eab2bb;
+    line-height: 1;
+    transition: color 0.3s ease;
+}
+
+.streak-label {
+    font-size: clamp(12px, 2vw, 14px);
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Améliorations du module-container */
+.module-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex: 1;
+    width: 100%;
+}
+
+/* Media queries pour mobile */
+@media (max-width: 900px) {
+    .module-container {
+        flex-direction: column;
+    }
+    
+    .weekly-graph,
+    .streaks {
+        margin: 10px;
+        max-width: 100%;
+        min-width: auto;
+    }
+    
+    .content-container {
+        border-radius: 3%;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    .weekly-graph {
+        min-height: 200px;
+        padding: 10px;
+    }
+    
+    .streaks {
+        min-height: 200px;
+        padding: 10px;
+    }
+    
+    .chart-wrapper {
+        min-height: 150px;
+    }
+    
+    .streak-container {
+        min-height: 150px;
+    }
+}
+
+/* Amélioration pour todo et topxp */
+.todo-summary {
+    border: 2px solid #eab2bb;
+    font-size: clamp(18px, 3vw, 35px);
+    background-color: #ffffff48;
+    border-radius: 10px;
+    margin: 10px;
+    min-height: 200px;
+    text-align: left;
+    padding: 10px;
+    flex: 1;
+    min-width: 250px;
+}
+
+.todo-summary h3 {
+    font-size: clamp(20px, 3vw, 25px);
+    font-weight: 250;
+}
+
+.topxp-summary {
+    flex: 1;
+    border: 2px solid #eab2bb;
+    margin: 10px;
+    border-radius: 10px;
+    background-color: #cacaca48;
+    transition: all 300ms;
+    padding: 10px;
+    min-width: 250px;
+}
+
+.topxp-summary h3 {
+    font-size: clamp(20px, 3vw, 25px);
+    font-weight: 250;
+    white-space: pre;
+}
+
+
+.checkbox-wrapper-5 {
+    text-align: right;
+    margin-right: 15px;
+    flex-shrink: 0; /* Empêche la checkbox de rétrécir */
+}
+
+.checkbox-wrapper-5 .check {
+    --size: 30px;
+    position: relative;
+    background: linear-gradient(90deg, #eab2bb, rgb(250, 150, 182));
+    line-height: 0;
+    perspective: 400px;
+    font-size: var(--size);
+}
+
+/* Media queries pour mobile */
+@media (max-width: 768px) {
+    .todo-summary {
+        margin: 5px;
+        padding: 8px;
+        min-height: 150px;
+    }
+    
+    .todo {
+        margin: 5px;
+        padding: 8px;
+    }
+    
+    .todo-description {
+        -webkit-line-clamp: 3; /* Plus de lignes sur mobile */
+    }
+    
+    .checkbox-wrapper-5 .check {
+        --size: 25px; /* Checkbox un peu plus petite sur mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .todo-summary {
+        margin: 3px;
+        padding: 5px;
+    }
+    
+    .todo {
+        margin: 3px;
+        padding: 5px;
+    }
+    
+    .checkbox-wrapper-5 .check {
+        --size: 22px;
+    }
+}
+
+/* === Motivation Card === */
+.motivation-card {
+  display: flex;
+  align-items: center;
+  padding: 16px 18px;
+  min-height: 90px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 220, 228, 0.35),
+    rgba(255, 240, 243, 0.6)
+  );
+}
+
+/* Contenu */
+.motivation-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Petit label discret */
+.motivation-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: #b86b7b;
+  text-transform: uppercase;
+}
+
+/* Quote */
+.motivation-quote {
+  font-size: 20px;
+  line-height: 1.4;
+  color: #4a4a4a;
+  font-style: italic;
+  margin: 0;
+}

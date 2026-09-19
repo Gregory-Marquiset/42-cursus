@@ -1,0 +1,17 @@
+# Genere par ./cursus au premier lancement
+projects/inception/srcs/.env
+projects/inception/srcs/secrets/
+projects/ft_transcendence/.env
+projects/cloud-1/docker/.env
+projects/cloud-1/docker/certs/
+
+# Artefacts de compilation
+obj/
+dep/
+*.o
+*.d
+*.cgi
+
+# Sorties des scripts de test de la piscine C++
+debug.txt
+.make.txt

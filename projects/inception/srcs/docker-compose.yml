@@ -1,0 +1,231 @@
+services:
+  portainer:
+    container_name: portainer
+    image: portainer
+    build:
+      context: ./bonus/portainer
+    environment:
+      - HOST_UID=${UID}
+      - HOST_GID=${GID}
+    ports:
+      - 9443:9443
+    user: "0:0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_volume:/data
+    secrets:
+      - portainer_admin_password_hash
+    networks: [inception_net]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSk https://127.0.0.1:9443/api/system/status >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+
+  adminer:
+    container_name: adminer
+    image: adminer
+    build: ./bonus/adminer
+    networks: [inception_net]
+    restart: unless-stopped
+
+  redis:
+    container_name: redis
+    image: redis
+    build: 
+      context: ./bonus/redis
+      args:
+        HOST_UID: ${UID}
+        HOST_GID: ${GID}
+    secrets:
+      - redis_password
+    networks: [inception_net]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$(cat /run/secrets/redis_password)\" ping | grep -q PONG || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  ftp:
+    container_name: ftp
+    image: ftp
+    build: ./bonus/ftp
+    environment:
+      - FTP_USER=${FTP_USER}
+      - PASV_ADDRESS=127.0.0.1
+      - PASV_MIN=30000
+      - PASV_MAX=30009
+      - FTP_ROOT=/var/www/html/wp-content/uploads
+      - FTP_PASS_FILE=/run/secrets/ftp_password
+    secrets:
+      - ftp_password
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
+    volumes:
+      - wordpress_volume:/var/www/html
+    networks: [inception_net]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "printf 'QUIT\r\n' | nc -w 2 127.0.0.1 21 | grep -q '^220 '"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  static:
+    container_name: static
+    image: static
+    build: ./bonus/static-site
+    networks: [inception_net]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  nginx:
+    container_name: nginx
+    image: nginx
+    build:
+      context: ./requirements/nginx
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    ports:
+      - "443:8443"
+    volumes:
+      - wordpress_volume:/var/www/html:ro
+    networks: [inception_net]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "https://localhost:8443/health", "--no-check-certificate"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    depends_on:
+      wordpress:
+        condition: service_healthy
+      adminer:
+        condition: service_started
+      static:
+        condition: service_started
+      portainer:
+        condition: service_healthy
+
+  wordpress:
+    container_name: wordpress
+    image: wordpress
+    user: "0:0"
+    build:
+      context: ./requirements/wordpress
+      args:
+        HOST_UID: ${UID}
+        HOST_GID: ${GID}
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - ENABLE_REDIS=1
+      - WP_REDIS_HOST=redis
+      - WP_REDIS_PORT=6379
+      - WP_CACHE_KEY_SALT=${DOMAIN_NAME}
+      - WP_URL=${WP_URL}
+      - WP_TITLE=${WP_TITLE}
+      - WP_ADMIN_USER=${WP_ADMIN_USER}
+      - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+      - WP_FORCE_ADMIN_PASSWORD=1
+      - MYSQL_PASSWORD_FILE=/run/secrets/mysql_password
+      - WP_ADMIN_PASSWORD_FILE=/run/secrets/wp_admin_password
+      - WP_REDIS_PASSWORD_FILE=/run/secrets/redis_password
+    secrets:
+      - mysql_password
+      - wp_admin_password
+      - redis_password
+    volumes:
+      - wordpress_volume:/var/www/html
+    networks: [inception_net]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-lc", "SCRIPT_NAME=/fpm-ping SCRIPT_FILENAME=/fpm-ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 | grep -q pong"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 90s
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  mariadb:
+    container_name: mariadb
+    image: mariadb
+    user: "0:0"
+    build:
+      context: ./requirements/mariadb
+      args:
+        HOST_UID: ${UID}
+        HOST_GID: ${GID}
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD_FILE=/run/secrets/mysql_password
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
+    secrets:
+      - mysql_root_password
+      - mysql_password
+    volumes:
+      - mariadb_volume:/var/lib/mysql
+      - ./secrets/mysql_password:/run/secrets/mysql_password:ro
+      - ./secrets/mysql_root_password:/run/secrets/mysql_root_password:ro
+    networks: [inception_net]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -uroot -p$(cat /run/secrets/mysql_root_password) --socket=/run/mysqld/mysqld.sock --silent"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+networks:
+  inception_net:
+    name: inception_network
+
+volumes:
+  wordpress_volume:
+    name: wordpress_volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/gmarquis/data/wordpress
+  mariadb_volume:
+    name: mariadb_volume
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/gmarquis/data/mariadb
+  portainer_volume:
+    name: portainer_volume
+    driver: local
+
+secrets:
+  mysql_root_password:
+    file: ./secrets/mysql_root_password
+  mysql_password:
+    file: ./secrets/mysql_password
+  wp_admin_password:
+    file: ./secrets/wp_admin_password
+  redis_password:
+    file: ./secrets/redis_password
+  ftp_password:
+    file: ./secrets/ftp_password
+  portainer_admin_password_hash:
+    file: ./secrets/portainer_admin_password_hash

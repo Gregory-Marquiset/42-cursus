@@ -1,0 +1,258 @@
+#!/usr/bin/env bash
+# Lanceur des projets 42 : `./cursus` ouvre le menu, `./cursus <projet> [args]` lance directement.
+# Seul prerequis : Docker (avec compose). Les projets C/C++ tournent dans l'image toolchain,
+# les projets Docker sont lances avec docker compose depuis la machine hote.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+P="$ROOT/projects"
+IMAGE="42-cursus/toolchain"
+STACKS="inception transcendence cloud-1"
+
+# Git Bash (Windows) : pas de conversion de chemins, et chemins hote au format C:/...
+export MSYS_NO_PATHCONV=1
+host_path() { if pwd -W >/dev/null 2>&1; then (cd "$1" && pwd -W); else echo "$1"; fi; }
+
+B=$'\033[1m'; G=$'\033[32m'; Y=$'\033[33m'; C=$'\033[36m'; R=$'\033[31m'; N=$'\033[0m'
+info() { echo "${C}==>${N} $*"; }
+die()  { echo "${R}erreur:${N} $*" >&2; exit 1; }
+ask()  { local r; read -r -p "$1 [${2:-}] " r || true; echo "${r:-${2:-}}"; }
+
+# ---------------------------------------------------------------- outils
+
+check_docker() {
+    command -v docker >/dev/null || die "Docker n'est pas installe (https://docs.docker.com/get-docker/)"
+    docker info >/dev/null 2>&1 || die "le daemon Docker ne repond pas : lance Docker puis recommence"
+    docker compose version >/dev/null 2>&1 || die "le plugin docker compose est requis"
+}
+
+toolchain() {
+    docker image inspect "$IMAGE" >/dev/null 2>&1 && return
+    info "Construction de l'image outils $IMAGE (une seule fois)..."
+    docker build -q -t "$IMAGE" "$(host_path "$ROOT/launcher")" >/dev/null
+}
+
+# in_box <dossier> <script> [args...] : lance le script dans l'image outils, dossier monte sur /work,
+# les args restent separes ("$@" dans le script)
+in_box() {
+    local dir="$1" script="$2"; shift 2
+    local tty=(-i); [ -t 0 ] && [ -t 1 ] && tty=(-it)
+    toolchain
+    docker run --rm "${tty[@]}" --init -v "$(host_path "$dir"):/work" -w /work \
+        ${DOCKER_ARGS[@]+"${DOCKER_ARGS[@]}"} "$IMAGE" bash -c "$script" _ "$@"
+}
+DOCKER_ARGS=()
+
+# Compile puis lance ./<bin> ; les args tapes dans le menu gardent leurs guillemets
+build_run() {
+    local dir="$1" bin="$2"; shift 2
+    in_box "$dir" "make -s && exec ./$bin \"\$@\"" "$@"
+}
+split_args() { set -f; eval "ARGV=($1)"; set +f; }
+
+rand() { (set +o pipefail; LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "${1:-20}"); }
+
+# ---------------------------------------------------------------- C / C++
+
+run_philo() {
+    local v="${1:-}"; shift || true
+    [ -z "$v" ] && v="$(ask "Version (philo / philo_bonus) ?" philo)"
+    [ -d "$P/philosophers/$v" ] || die "version inconnue : $v"
+    ARGV=("$@")
+    [ $# -eq 0 ] && split_args "$(ask "Arguments : nb_philo t_die t_eat t_sleep [nb_repas] ?" "5 800 200 200 7")"
+    build_run "$P/philosophers/$v" "$v" ${ARGV[@]+"${ARGV[@]}"}
+}
+
+cpp_bin() { sed -n 's/^NAME[[:space:]]*:*=[[:space:]]*//p' "$1/Makefile" | head -1; }
+
+run_cpp() {
+    local mod="${1:-}" ex="${2:-}"; shift 2 2>/dev/null || shift $#
+    if [ -z "$mod" ]; then
+        echo "Modules : $(cd "$P/cpp-modules" && ls -d cpp_* | tr '\n' ' ')"
+        mod="$(ask "Module ?" cpp_00)"
+    fi
+    [[ "$mod" =~ ^[0-9]+$ ]] && mod="$(printf 'cpp_%02d' "$((10#$mod))")"
+    [ -d "$P/cpp-modules/$mod" ] || die "module inconnu : $mod"
+    if [ -z "$ex" ]; then
+        echo "Exercices : $(cd "$P/cpp-modules/$mod" && ls -d ex* | tr '\n' ' ')"
+        ex="$(ask "Exercice ?" ex00)"
+    fi
+    [[ "$ex" =~ ^[0-9]+$ ]] && ex="$(printf 'ex%02d' "$((10#$ex))")"
+    local dir="$P/cpp-modules/$mod/$ex"
+    [ -d "$dir" ] || die "exercice inconnu : $mod/$ex"
+    local bin; bin="$(cpp_bin "$dir")"
+    ARGV=("$@")
+    [ $# -eq 0 ] && [ -t 0 ] && split_args "$(ask "Arguments de ./$bin (Entree = aucun) ?" "")"
+    build_run "$dir" "$bin" ${ARGV[@]+"${ARGV[@]}"}
+}
+
+run_webserv() {
+    local conf="${1:-files/valid/webServ.conf}"
+    local port; port="$(sed -n 's/^[[:space:]]*listen[[:space:]]\{1,\}\([0-9]\{1,\}\);.*/\1/p' "$P/webserv/$conf" | head -1)"
+    DOCKER_ARGS=(-p "${port:-1045}:${port:-1045}")
+    info "webserv sur ${B}http://localhost:${port:-1045}${N}  (Ctrl+C pour arreter)"
+    build_run "$P/webserv" webserv "$conf"
+}
+
+# ---------------------------------------------------------------- stacks Docker
+
+compose() {
+    case "$1" in
+        inception)     (cd "$P/inception/srcs" && shift && docker compose -p inception --env-file .env \
+                            -f docker-compose.yml -f "$(host_path "$ROOT/launcher")/inception.override.yml" "$@") ;;
+        transcendence) (cd "$P/ft_transcendence" && shift && docker compose -p transcendence --env-file .env \
+                            -f docker-compose.yml -f "$(host_path "$ROOT/launcher")/transcendence.override.yml" "$@") ;;
+        cloud-1)       (cd "$P/cloud-1/docker" && shift && docker compose -p cloud-1 "$@") ;;
+        *) die "stack inconnue : $1" ;;
+    esac
+}
+
+prep_inception() {
+    local s="$P/inception/srcs"
+    [ -f "$s/.env" ] || sed -e 's/^DOMAIN_NAME=.*/DOMAIN_NAME=localhost/' \
+                            -e 's#^WP_URL=.*#WP_URL=https://localhost#' "$s/.env.exemple" > "$s/.env"
+    [ -d "$s/secrets" ] && return
+    info "Generation des secrets (srcs/secrets/, ignores par git)"
+    mkdir -p "$s/secrets"
+    local f; for f in mysql_root_password mysql_password wp_admin_password redis_password ftp_password; do
+        rand > "$s/secrets/$f"
+    done
+    local pw; pw="$(rand)"
+    docker run --rm httpd:2.4-alpine htpasswd -nbB admin "$pw" | cut -d: -f2 | tr -d '\r\n' \
+        > "$s/secrets/portainer_admin_password_hash"
+    echo "$pw" > "$s/secrets/portainer_admin_password"
+}
+
+prep_transcendence() {
+    local d="$P/ft_transcendence"
+    [ -f "$d/.env" ] || cp "$d/.denv" "$d/.env"
+}
+
+prep_cloud1() {
+    local d="$P/cloud-1/docker"
+    if [ ! -f "$d/.env" ]; then
+        printf 'MARIADB_ROOT_PASSWORD=%s\nDB_NAME=wordpress\nDB_USER=wordpress\nDB_PASSWORD=%s\nDOMAIN=localhost\n' \
+            "$(rand)" "$(rand)" > "$d/.env"
+    fi
+    if [ ! -f "$d/certs/cloud1.crt" ]; then
+        mkdir -p "$d/certs"
+        in_box "$d/certs" "openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -keyout cloud1.key -out cloud1.crt -subj /CN=localhost 2>/dev/null" </dev/null
+    fi
+}
+
+# Meme etape que le role Ansible `app` : installer WordPress par WP-CLI, sans ecran d'installation
+install_cloud1_wp() {
+    local wp=(run --rm -T wpcli wp)
+    compose cloud-1 "${wp[@]}" core is-installed >/dev/null 2>&1 && return
+    local i; for i in $(seq 1 10); do compose cloud-1 "${wp[@]}" core version >/dev/null 2>&1 && break; sleep 3; done
+    local pw; pw="$(rand)"
+    compose cloud-1 "${wp[@]}" core install --url=https://localhost --title=Cloud-1 \
+        --admin_user=admin --admin_password="$pw" --admin_email=admin@example.com --skip-email >/dev/null 2>&1
+    echo "WP_ADMIN_PASSWORD=$pw" >> "$P/cloud-1/docker/.env"
+    info "WordPress installe (admin / WP_ADMIN_PASSWORD dans projects/cloud-1/docker/.env)"
+}
+
+stack_up() {
+    local s="$1"
+    for other in $STACKS; do
+        [ "$other" != "$s" ] && [ -n "$(compose "$other" ps -q 2>/dev/null)" ] && {
+            info "Arret de $other (ports partages)"; compose "$other" down; }
+    done
+    case "$s" in
+        inception)     prep_inception ;;
+        transcendence) prep_transcendence ;;
+        cloud-1)       prep_cloud1 ;;
+    esac
+    info "Demarrage de $s (le premier build peut prendre plusieurs minutes)..."
+    compose "$s" up -d --build --wait || { compose "$s" ps; die "$s n'est pas demarre correctement (./cursus logs $s)"; }
+    [ "$s" = cloud-1 ] && install_cloud1_wp
+    echo
+    case "$s" in
+        inception)     echo "  WordPress   ${B}https://localhost${N}   (admin : gmarquis / srcs/secrets/wp_admin_password)"
+                       echo "  Portainer   ${B}https://localhost:9443${N}   (admin / srcs/secrets/portainer_admin_password)" ;;
+        transcendence) echo "  Application ${B}https://localhost:8001${N}"
+                       echo "  Grafana     ${B}http://localhost:3000${N}    Prometheus ${B}http://localhost:9090${N}    Adminer ${B}http://localhost:8080${N}" ;;
+        cloud-1)       echo "  WordPress   ${B}https://localhost${N}    phpMyAdmin ${B}https://localhost/phpmyadmin/${N}" ;;
+    esac
+    echo "  Certificats auto-signes : accepter l'avertissement du navigateur."
+    echo "  Arreter : ${B}./cursus stop $s${N}"
+}
+
+# ---------------------------------------------------------------- menu
+
+usage() {
+    cat <<EOF
+${B}42-cursus${N} — lanceur des projets de l'ecole 42
+
+  ./cursus                                  menu interactif
+  ./cursus philo [philo|philo_bonus] [args] ex : ./cursus philo philo 5 800 200 200 7
+  ./cursus cpp [module] [exercice] [args]   ex : ./cursus cpp 09 01 "8 9 * 9 - 9 - 9 - 4 - 1 +"
+  ./cursus webserv [config]                 serveur HTTP sur http://localhost:1045
+  ./cursus inception                        WordPress + nginx + MariaDB + bonus
+  ./cursus transcendence                    application web complete (microservices)
+  ./cursus cloud-1                          stack deployee par Cloud-1, en local
+  ./cursus stop <stack> | logs <stack> | status
+  ./cursus clean                            arrete tout, supprime volumes et image outils
+EOF
+}
+
+menu() {
+    while true; do
+        echo
+        echo "${B}  42-cursus${N}"
+        echo "  ${Y}C / C++${N}"
+        echo "    1) philosophers       threads, mutex, semaphores"
+        echo "    2) cpp-modules        piscine C++98, modules 00 a 09"
+        echo "    3) webserv            serveur HTTP non bloquant (epoll, CGI)"
+        echo "  ${Y}Docker / DevOps${N}"
+        echo "    4) inception          WordPress, nginx TLS, MariaDB, Redis, FTP, Portainer"
+        echo "    5) ft_transcendence   microservices Node, Vault, WAF, Prometheus/Grafana"
+        echo "    6) cloud-1            la stack deployee par Terraform + Ansible, en local"
+        echo "    s) etat des stacks    x) tout arreter    q) quitter"
+        case "$(ask "Choix ?" "")" in
+            1) run_philo ;;
+            2) run_cpp ;;
+            3) run_webserv ;;
+            4) stack_up inception ;;
+            5) stack_up transcendence ;;
+            6) stack_up cloud-1 ;;
+            s) status ;;
+            x) for s in $STACKS; do compose "$s" down; done ;;
+            q|"") exit 0 ;;
+            *) echo "choix inconnu" ;;
+        esac
+    done
+}
+
+status() {
+    for s in $STACKS; do
+        echo "${B}$s${N}"; compose "$s" ps --format 'table {{.Service}}\t{{.State}}\t{{.Health}}' 2>/dev/null | sed 's/^/  /'
+    done
+}
+
+clean() {
+    for s in $STACKS; do compose "$s" down -v --remove-orphans 2>/dev/null || true; done
+    docker image rm "$IMAGE" 2>/dev/null || true
+}
+
+main() {
+    case "${1:-}" in -h|--help|help) usage; exit 0 ;; esac
+    check_docker
+    local cmd="${1:-}"; shift || true
+    case "$cmd" in
+        "")                    usage; menu ;;
+        philo|philosophers)    run_philo "$@" ;;
+        cpp|cpp-modules)       run_cpp "$@" ;;
+        webserv)               run_webserv "$@" ;;
+        inception|cloud-1)     stack_up "$cmd" ;;
+        transcendence|ft_transcendence) stack_up transcendence ;;
+        stop)                  compose "${1:?stack ?}" down ;;
+        logs)                  compose "${1:?stack ?}" logs -f --tail=100 ;;
+        status)                status ;;
+        clean)                 clean ;;
+        *)                     usage; exit 1 ;;
+    esac
+}
+
+main "$@"

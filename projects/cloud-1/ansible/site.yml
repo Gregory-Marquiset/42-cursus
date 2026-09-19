@@ -1,0 +1,8 @@
+- name: Deploiement de la stack WordPress
+  hosts: cloud1
+  become: true
+  roles:
+    - common
+    - docker
+    - dns
+    - app
