@@ -98,6 +98,8 @@ Everything in the web page is also available from a terminal:
   at the path the Docker daemon knows (`/run/desktop/mnt/host/c/...` on Docker Desktop for
   Windows, the same path elsewhere), so the containers and compose files it starts resolve
   their bind mounts correctly.
+- **Real holy graph.** Node positions, states and marks come from my graph on the 42 intranet,
+  converted by [`launcher/graph-from-intra.js`](launcher/graph-from-intra.js).
 - **Game mode for cub3D.** noVNC only sends absolute pointer positions, which breaks a game that
   re-centres the mouse every frame. The page captures the mouse (Pointer Lock) and sends relative
   moves to a small bridge in the container ([`launcher/input-bridge.py`](launcher/input-bridge.py)),

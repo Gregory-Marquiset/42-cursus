@@ -98,6 +98,8 @@ Tout ce que fait la page existe aussi depuis un terminal :
   chemin que connaît le daemon (`/run/desktop/mnt/host/c/...` avec Docker Desktop sous Windows,
   le même chemin ailleurs) : les conteneurs et les fichiers compose qu'il lance résolvent donc
   correctement leurs montages.
+- **Le vrai holy graph.** Les positions, les etats et les notes viennent de mon graph sur
+  l'intra 42, convertis par [`launcher/graph-from-intra.js`](launcher/graph-from-intra.js).
 - **Mode jeu pour cub3D.** noVNC n'envoie que des positions absolues, ce qui casse un jeu qui
   recentre la souris à chaque image. La page capture la souris (Pointer Lock) et envoie des
   déplacements relatifs à un petit pont dans le conteneur ([`launcher/input-bridge.py`](launcher/input-bridge.py)),

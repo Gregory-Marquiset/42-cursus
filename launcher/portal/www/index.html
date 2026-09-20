@@ -57,22 +57,25 @@
 
   #graph { position: fixed; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
   #graph.dragging { cursor: grabbing; }
-  .ring { fill: none; stroke: var(--ring); stroke-opacity: .55; stroke-width: 2; }
-  .ring.outer { stroke-dasharray: 3 7; stroke-opacity: .35; }
-  .edge { stroke: var(--teal); stroke-opacity: .35; stroke-width: 2; }
-  .edge.dim { stroke: var(--alt); stroke-opacity: .5; }
+  .edge { fill: none; stroke: var(--alt); stroke-opacity: .55; stroke-width: 3; }
+  .edge.done { stroke: var(--teal); stroke-opacity: .5; }
   .node { cursor: pointer; }
-  .node circle { transition: filter .15s; }
-  .node.done circle { fill: var(--teal); }
+  .node circle { fill: var(--bg-2); stroke: var(--alt); stroke-width: 3; transition: filter .15s; }
+  .node text { font-family: var(--font); text-anchor: middle; dominant-baseline: central;
+               pointer-events: none; fill: var(--muted); }
+  .node.done circle { fill: var(--teal); stroke: none; }
   .node.done text { fill: var(--teal-ink); font-weight: 700; }
-  .node.alt circle { fill: var(--bg-2); stroke: var(--alt); stroke-width: 2; }
-  .node.alt text { fill: var(--muted); }
-  .node.exam rect { fill: var(--exam); }
-  .node.exam text { fill: #d7f6f7; font-weight: 600; }
+  .node.fail circle { fill: #7d2233; stroke: #c9455f; }
+  .node.fail text, .node.in_progress text { fill: #fff; font-weight: 600; }
+  .node.in_progress circle { fill: #7a5a12; stroke: #e0a63a; }
+  .node.available circle { stroke: var(--ring); }
+  .node.unavailable, .node.not_recommended { opacity: .5; }
+  .node.exam circle, .node.piscine circle { stroke-dasharray: 7 6; }
   .node:focus { outline: none; }
-  .node:hover circle, .node:hover rect, .node:focus-visible circle, .node:focus-visible rect, .node.sel circle, .node.sel rect { filter: drop-shadow(0 0 10px var(--teal)); }
-  .node.sel circle { stroke: #fff; stroke-width: 3; }
-  .node text { font-family: var(--font); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .node:hover circle, .node:focus-visible circle, .node.sel circle { filter: drop-shadow(0 0 14px var(--teal)); }
+  .node.sel circle { stroke: #fff; stroke-width: 5; }
+  /* de loin : seuls les projets faits gardent leur nom */
+  #graph.far .node:not(.done):not(.fail):not(.in_progress) text { display: none; }
 
   aside {
     position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100%); z-index: 6;
@@ -83,6 +86,9 @@
   aside .close { position: absolute; top: 14px; right: 14px; padding: 4px 10px; }
   aside h2 { margin: 0 0 4px; font-size: 24px; }
   aside .kicker { color: var(--teal); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  aside .kicker.fail { color: #e06a82; }
+  aside .kicker.in_progress { color: #e0a63a; }
+  aside .kicker.available, aside .kicker.unavailable, aside .kicker.not_recommended { color: var(--muted); }
   aside p.desc { color: #cfd6e8; }
   .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
   .tags span { font-size: 12px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 99px; padding: 2px 9px; color: var(--muted); }
@@ -104,10 +110,13 @@
   #drawer iframe { border: 0; flex: 1; min-width: 0; background: var(--bg); }
   #drawer .screen { flex: 1.6; min-width: 0; display: flex; position: relative; border-left: 1px solid var(--line); background: #000; }
   #drawer .screen[hidden] { display: none; }
-  #game { position: absolute; inset: 0; cursor: none; display: flex; align-items: flex-start; justify-content: center; }
+  #game { position: absolute; inset: 0; cursor: pointer; display: flex; align-items: flex-start; justify-content: center; }
   #game[hidden] { display: none; }
-  #game span { margin-top: 10px; font-size: 12px; color: #fff; background: rgba(11, 16, 32, .75); border: 1px solid var(--teal); border-radius: 99px; padding: 3px 12px; }
-  #game.locked span { opacity: .6; }
+  #game span { margin-top: 10px; font-size: 13px; color: #fff; background: rgba(11, 16, 32, .85); border: 1px solid var(--teal); border-radius: 99px; padding: 5px 14px; }
+  #game button { position: absolute; top: 8px; right: 8px; padding: 2px 9px; }
+  #game.locked { cursor: none; }
+  #game.locked span { opacity: .55; }
+  #game.locked button { display: none; }
   body.running aside { bottom: min(58vh, 560px); }
 
   @media (max-width: 700px) {
@@ -136,8 +145,9 @@
 
 <div class="legend">
   <span><i style="background:var(--teal)"></i><span data-i18n="lg_done"></span></span>
-  <span><i style="background:var(--exam)"></i><span data-i18n="lg_exam"></span></span>
+  <span><i style="background:#7d2233;border:2px solid #c9455f"></i><span data-i18n="lg_exam"></span></span>
   <span><i style="background:var(--bg-2);border:2px solid var(--alt)"></i><span data-i18n="lg_alt"></span></span>
+  <span data-i18n="legend_source"></span>
 </div>
 
 <aside id="panel" aria-live="polite"></aside>
@@ -152,7 +162,7 @@
     <iframe id="term" title="Terminal"></iframe>
     <div id="screen-wrap" class="screen" hidden>
       <iframe id="screen" title="Screen"></iframe>
-      <div id="game" hidden><span id="game-hint"></span></div>
+      <div id="game" hidden><span id="game-hint"></span><button id="game-off" title="noVNC">✕</button></div>
     </div>
   </div>
 </section>
@@ -162,26 +172,32 @@ const I18N = {
   fr: {
     tagline: "Mes projets de l'école 42. Clique sur un projet pour le lancer : tout tourne dans Docker.",
     fit: "Recentrer", stopall: "Tout arrêter", close_term: "Fermer",
-    lg_done: "validé", lg_exam: "examen", lg_alt: "option non choisie",
+    lg_done: "validé", lg_exam: "échoué / en cours", lg_alt: "pas fait",
     launch: "Lancer", code: "Code", team_repo: "Dépôt d'équipe", with: "Avec",
-    exam: "Examen", exam_desc: "Examen sur machine, sans internet, en temps limité : aucun code rendu.",
-    alt: "Option non choisie", alt_desc: "Projet au choix du cursus : j'ai pris l'autre branche à ce rang.",
+    exam_desc: "Examen sur machine, sans internet, en temps limité : aucun code rendu.",
+    not_here: "Ce projet n'est pas dans ce dépôt.",
     nothing: "Rien à exécuter : le rendu se lit dans le dépôt.", screen: "Écran",
-    ring: r => r >= 7 ? "Hors tronc commun" : "Rang " + String(r).padStart(2, "0"),
+    mark: "note", st_done: "validé", st_fail: "échoué", st_in_progress: "en cours", st_available: "disponible",
+    st_unavailable: "verrouillé", st_not_recommended: "non recommandé",
+    legend_source: "positions et notes : mon holy graph sur l'intra 42",
     reload_screen: "Recharger l'écran",
-    game: "Mode jeu", game_hint: "Souris capturée — Échap pour la libérer", sensitivity: "Sensibilité"
+    game: "Mode jeu", game_hint: "Souris capturée — Échap pour la libérer", sensitivity: "Sensibilité",
+    game_click: "Clique ici pour jouer : souris et clavier vont au jeu"
   },
   en: {
     tagline: "My projects from 42 school. Click a project to run it: everything runs in Docker.",
     fit: "Recenter", stopall: "Stop everything", close_term: "Close",
-    lg_done: "validated", lg_exam: "exam", lg_alt: "option not taken",
+    lg_done: "validated", lg_exam: "failed / ongoing", lg_alt: "not done",
     launch: "Run", code: "Code", team_repo: "Team repo", with: "With",
-    exam: "Exam", exam_desc: "Timed exam on a school machine without internet: no code submitted.",
-    alt: "Option not taken", alt_desc: "An elective of the cursus: I took the other branch at this rank.",
+    exam_desc: "Timed exam on a school machine without internet: no code submitted.",
+    not_here: "This project is not in this repository.",
     nothing: "Nothing to run: the deliverable is in the repo.", screen: "Screen",
-    ring: r => r >= 7 ? "Beyond the common core" : "Rank " + String(r).padStart(2, "0"),
+    mark: "mark", st_done: "validated", st_fail: "failed", st_in_progress: "ongoing", st_available: "available",
+    st_unavailable: "locked", st_not_recommended: "not recommended",
+    legend_source: "positions and marks: my holy graph on the 42 intranet",
     reload_screen: "Reload screen",
-    game: "Game mode", game_hint: "Mouse captured — Esc to release", sensitivity: "Sensitivity"
+    game: "Game mode", game_hint: "Mouse captured — Esc to release", sensitivity: "Sensitivity",
+    game_click: "Click here to play: mouse and keyboard go to the game"
   }
 };
 const SCREEN_URL = "http://localhost:6080/vnc.html?autoconnect=1&resize=scale&reconnect=1";
@@ -199,59 +215,71 @@ function el(tag, attrs = {}, parent) {
 }
 
 // ---------------------------------------------------------------- graph
+// Positions, etats et traces des liens viennent du holy graph de l'intra
+// (launcher/graph-from-intra.js). Rien n'est recalcule ici.
 
-function pos(n) {
-  const r = GRAPH.rings[n.ring], a = n.a * Math.PI / 180;
-  return [r * Math.cos(a), -r * Math.sin(a)];
-}
+const R_NODE = { project: 54, big_project: 70, piscine: 62, rush: 46, exam: 46 };
 
-function fitLabel(text, name, max) {
-  let size = 13;
-  text.textContent = name;
-  text.setAttribute("font-size", size);
-  while (text.getComputedTextLength() > max && size > 8) text.setAttribute("font-size", --size);
+// le nom est coupe en lignes qui tiennent dans le cercle
+function label(g, name, r) {
+  const words = name.split(/\s+/), lines = [];
+  const max = Math.max(9, Math.round(r / 3.4));   // caracteres par ligne
+  for (const w of words) {
+    if (lines.length && (lines[lines.length - 1] + " " + w).length <= max) lines[lines.length - 1] += " " + w;
+    else lines.push(w);
+  }
+  const size = lines.length > 2 ? 15 : 17;
+  lines.forEach((line, i) => {
+    el("text", { y: (i - (lines.length - 1) / 2) * size * 1.15, "font-size": size }, g).textContent = line;
+  });
 }
 
 function draw() {
   const world = $("#world");
   world.innerHTML = "";
-  const byId = Object.fromEntries(GRAPH.nodes.map(n => [n.id, n]));
-  GRAPH.rings.forEach((r, i) => { if (r) el("circle", { r, class: "ring" + (i === GRAPH.rings.length - 1 ? " outer" : "") }, world); });
-  for (const n of GRAPH.nodes) for (const p of n.after || []) {
-    if (!byId[p]) continue;
-    const [x1, y1] = pos(byId[p]), [x2, y2] = pos(n);
-    el("line", { x1, y1, x2, y2, class: "edge" + (n.alt ? " dim" : "") }, world);
+  for (const e of GRAPH.edges) {
+    el("polyline", { points: e.points.map(p => p.join(",")).join(" "), class: "edge" + (e.done ? " done" : "") }, world);
   }
   for (const n of GRAPH.nodes) {
-    const [x, y] = pos(n);
-    const kind = n.exam ? "exam" : n.alt ? "alt" : "done";
-    const g = el("g", { class: "node " + kind, transform: `translate(${x},${y})`, tabindex: 0, role: "button", "aria-label": n.name }, world);
+    const g = el("g", {
+      class: `node ${n.state} ${n.kind}${n.project ? " runnable" : ""}`,
+      transform: `translate(${n.x},${n.y})`, tabindex: 0, role: "button",
+      "aria-label": `${n.name} — ${t("st_" + n.state) || n.state}`,
+    }, world);
     g.dataset.id = n.id;
-    let text;
-    if (n.exam) {
-      el("rect", { x: -48, y: -13, width: 96, height: 26, rx: 13 }, g);
-      text = el("text", {}, g); fitLabel(text, n.name, 86);
-    } else {
-      const r = n.id === "libft" ? 46 : n.alt ? 30 : 38;
-      el("circle", { r }, g);
-      text = el("text", {}, g); fitLabel(text, n.name, r * 2 - 10);
-    }
-    g.addEventListener("click", e => { e.stopPropagation(); select(n.id); });
-    g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(n.id); } });
+    const r = R_NODE[n.kind] || 54;
+    el("circle", { r }, g);
+    label(g, n.name, r);
+    g.addEventListener("click", ev => { ev.stopPropagation(); select(n.id); });
+    g.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); select(n.id); } });
   }
 }
 
 // ---------------------------------------------------------------- pan / zoom
 
 const view = { x: 0, y: 0, k: 1 };
-function apply() { $("#world").setAttribute("transform", `translate(${view.x},${view.y}) scale(${view.k})`); }
+function apply() {
+  $("#world").setAttribute("transform", `translate(${view.x},${view.y}) scale(${view.k})`);
+  // de loin, seuls les projets faits restent lisibles ; le reste se lit en zoomant
+  $("#graph").classList.toggle("far", view.k < 0.22);
+}
+// cadre de depart : mes projets (faits, echoues, en cours). Le reste du cursus est autour,
+// on y arrive en dezoomant.
+function focusBounds() {
+  const mine = GRAPH.nodes.filter(n => ["done", "fail", "in_progress"].includes(n.state));
+  const xs = mine.map(n => n.x), ys = mine.map(n => n.y);
+  return { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
+}
+
 function fit() {
   const svg = $("#graph"), w = svg.clientWidth, h = svg.clientHeight;
-  const R = GRAPH.rings[GRAPH.rings.length - 1] + 60;
+  const b = GRAPH.focus, pad = 120;
+  const gw = b.x1 - b.x0 + 2 * pad, gh = b.y1 - b.y0 + 2 * pad;
   const freeW = $("#panel").classList.contains("open") && w > 700 ? w - 420 : w;
-  const freeH = document.body.classList.contains("running") ? h - Math.min(h * .58, 560) : h;
-  view.k = Math.min(freeW, freeH - 60) / (2 * R);
-  view.x = freeW / 2; view.y = 60 + (freeH - 60) / 2;
+  const freeH = (document.body.classList.contains("running") ? h - Math.min(h * .58, 560) : h) - 70;
+  view.k = Math.min(freeW / gw, freeH / gh);
+  view.x = freeW / 2 - (b.x0 + b.x1) / 2 * view.k;
+  view.y = 70 + freeH / 2 - (b.y0 + b.y1) / 2 * view.k;
   apply();
 }
 (function panzoom() {
@@ -301,10 +329,11 @@ function renderPanel() {
   const n = GRAPH.nodes.find(x => x.id === selected);
   if (!n) return;
   const p = n.project && DATA.projects[n.project];
+  const mark = n.mark != null ? ` · ${t("mark")} ${n.mark}` : "";
   let html = `<button class="close" aria-label="close">✕</button>
-    <div class="kicker">${esc(t("ring")(n.ring))}</div><h2>${esc(n.name)}</h2>`;
+    <div class="kicker ${n.state}">${esc(t("st_" + n.state) || n.state)}${mark}</div><h2>${esc(n.name)}</h2>`;
   if (!p) {
-    html += `<p class="desc">${esc(n.exam ? t("exam_desc") : t("alt_desc"))}</p>`;
+    html += `<p class="desc">${esc(n.kind === "exam" || n.kind === "piscine" && /exam/.test(n.slug) ? t("exam_desc") : t("not_here"))}</p>`;
   } else {
     html += `<p class="desc">${esc(p[lang])}</p><div class="tags">${p.stack.map(s => `<span>${esc(s)}</span>`).join("")}</div>`;
     if (p.team) {
@@ -346,7 +375,7 @@ function launch(args, run = {}) {
   if (run.screen) {
     if (run.mouselook) links.insertAdjacentHTML("beforeend",
       `<button class="primary" id="game-on">🎮 ${t("game")}</button>
-       <label class="sens">${t("sensitivity")} <input type="range" id="sens" min="2" max="60" value="${Math.round(game.sens * 100)}"></label> `);
+       <label class="sens">${t("sensitivity")} <input type="range" id="sens" min="1" max="50" value="${Math.round(game.sens * 100)}"></label> `);
     links.insertAdjacentHTML("beforeend", `<button id="reload-screen">${t("reload_screen")}</button> <a class="btn" href="${SCREEN_URL}" target="_blank" rel="noopener">${t("screen")} ↗</a>`);
     $("#reload-screen").onclick = () => { screen.src = SCREEN_URL; };
     if (run.mouselook) {
@@ -357,7 +386,11 @@ function launch(args, run = {}) {
       };
     }
     // le programme compile d'abord : on attend que l'ecran virtuel soit en place
-    setTimeout(() => { if (!$("#screen-wrap").hidden) screen.src = SCREEN_URL; }, 9000);
+    setTimeout(() => {
+      if ($("#screen-wrap").hidden) return;
+      screen.src = SCREEN_URL;
+      if (run.mouselook) gamePrompt();
+    }, 9000);
   }
   fit();
 }
@@ -371,7 +404,7 @@ const BRIDGE_URL = "ws://localhost:6081";
 // sens : la souris du navigateur bouge par grands pas (acceleration du systeme), le jeu tourne
 // de 0.0025 rad par pixel -> on divise, et le reste fractionnaire est garde pour le coup d'apres
 // held : X ne repete pas les touches injectees par XTest, la page refait la repetition elle-meme
-const game = { ws: null, dx: 0, dy: 0, raf: 0, held: new Map(), sens: 0.3 };
+const game = { ws: null, dx: 0, dy: 0, raf: 0, held: new Map(), sens: 0.15 };
 try { game.sens = parseFloat(localStorage.getItem("sens")) || game.sens; } catch {}
 const REPEAT_MS = 33;
 const X_KEYS = { Space: "space", ArrowLeft: "Left", ArrowRight: "Right", ArrowUp: "Up", ArrowDown: "Down",
@@ -385,23 +418,32 @@ function xKey(code) {
 function send(line) {
   if (game.ws && game.ws.readyState === 1) game.ws.send(new TextEncoder().encode(line + "\n"));
 }
-function gameOn() {
-  const layer = $("#game");
-  layer.hidden = false;
-  $("#game-hint").textContent = t("game_hint");
-  if (!game.ws || game.ws.readyState > 1) game.ws = new WebSocket(BRIDGE_URL, ["binary"]);
-  layer.requestPointerLock();
+// le calque couvre l'ecran du jeu : visible = mode jeu propose, clic = souris capturee
+function gamePrompt() {
+  $("#game").hidden = false;
+  $("#game").classList.remove("locked");
+  $("#game-hint").textContent = t("game_click");
 }
-function gameOff() {
+function gameOn() {
+  gamePrompt();
+  if (!game.ws || game.ws.readyState > 1) game.ws = new WebSocket(BRIDGE_URL, ["binary"]);
+  $("#game").requestPointerLock();
+}
+function gameOff() {          // retour a noVNC : on rend la souris et le calque disparait
   releaseKeys();
   $("#game").hidden = true;
   $("#game").classList.remove("locked");
   if (document.pointerLockElement) document.exitPointerLock();
 }
+$("#game").addEventListener("click", e => {
+  if (e.target.id === "game-off") return gameOff();
+  if (document.pointerLockElement !== $("#game")) gameOn();
+});
 document.addEventListener("pointerlockchange", () => {
   const locked = document.pointerLockElement === $("#game");
   $("#game").classList.toggle("locked", locked);
-  if (!locked) gameOff();
+  $("#game-hint").textContent = t(locked ? "game_hint" : "game_click");
+  if (!locked) releaseKeys();   // Echap : la souris redevient normale, le calque reste proposable
 });
 // deplacements cumules et envoyes une fois par image
 $("#game").addEventListener("mousemove", e => {
@@ -464,7 +506,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") closePanel()
 window.addEventListener("resize", fit);
 
 Promise.all([fetch("projects.json").then(r => r.json()), fetch("graph.json").then(r => r.json())])
-  .then(([d, g]) => { DATA = d; GRAPH = g; translate(); draw(); fit(); });
+  .then(([d, g]) => { DATA = d; GRAPH = g; GRAPH.focus = focusBounds(); translate(); draw(); fit(); });
 </script>
 </body>
 </html>
