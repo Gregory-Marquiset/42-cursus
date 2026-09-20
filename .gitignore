@@ -65,3 +65,16 @@ projects/cpp-modules/*/*/serializer
 projects/cpp-modules/*/*/violence
 projects/cpp-modules/*/*/whatever
 projects/cpp-modules/*/*/zombie
+
+# Binaires des projets (les mlx-test de minilibx viennent des depots dorigine, eux restent)
+projects/cub3d/cub3D
+projects/cub3d/cub3D_bonus
+projects/fdf/fdf
+projects/push_swap/push_swap
+projects/push_swap/checker
+projects/minitalk/client*
+projects/minitalk/server*
+projects/minishell/minishell
+projects/webserv/webserv
+projects/philosophers/philo/philo
+projects/philosophers/philo_bonus/philo_bonus
