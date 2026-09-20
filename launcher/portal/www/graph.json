@@ -11,7 +11,7 @@
   832,
   982
  ],
- "core": 1042,
+ "core": 1000,
  "_comment": "Genere par launcher/graph-from-intra.js a partir du holy graph de l'intra 42",
  "bounds": {
   "x0": 1431,

@@ -139,7 +139,20 @@ for (const r of nodes.map(dist).sort((a, b) => a - b)) {
   else rings.push([r]);
 }
 const ringRadii = rings.map((g) => Math.round(g.reduce((a, b) => a + b) / g.length));
-const core = Math.round(Math.max(...nodes.map(dist).filter((r) => r <= 1010)) + 45);
+// Le cercle du tronc commun : les branches d'apres-tronc-commun y prennent racine, donc son rayon
+// se lit dans les traces eux-memes — a l'extremite des liens qui ne partent d'aucun projet.
+const roots = [];
+for (const p of placed) {
+  for (const link of p.by || []) {
+    if (idByProject.has(link.parent_id) || !link.points) continue;
+    for (const pt of link.points) {
+      const r = Math.hypot(pt[0] - center.x, pt[1] - center.y);
+      if (Math.hypot(pt[0] - p.x, pt[1] - p.y) > 1 && r > 900 && r < 1100) roots.push(r);
+    }
+  }
+}
+roots.sort((a, b) => a - b);
+const core = roots.length ? Math.round(roots[Math.floor(roots.length / 2)]) : 1000;
 
 const xs = nodes.map((n) => n.x), ys = nodes.map((n) => n.y);
 const out = {
