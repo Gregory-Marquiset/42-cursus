@@ -6,5 +6,5 @@ ln -sfn "$CURSUS_ROOT/launcher/portal/www" /portal/www
 ln -sfn "$CURSUS_ROOT/projects" /portal/projects      # pour servir les sujets (PDF)
 nginx
 # -a : la page passe la commande en parametres d'URL (?arg=philo&arg=philo)
-exec ttyd -p 7681 -i lo -b /term -W -a -O -t fontSize=14 -t 'theme={"background":"#0b1020"}' \
+exec ttyd -p 7681 -i lo -b /term -W -a -O -m "${CURSUS_MAX_CLIENTS:-6}" -t fontSize=14 -t 'theme={"background":"#0b1020"}' \
     -t titleFixed=42-cursus bash "$CURSUS_ROOT/cursus" web

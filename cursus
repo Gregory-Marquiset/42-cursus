@@ -41,7 +41,11 @@ in_box() {
     # quelques projets ont besoin d'une autre image que l'image outils (Node recent, par exemple)
     local img="${BOX_IMAGE:-$IMAGE}" shell=sh; BOX_IMAGE=""
     [ "$img" = "$IMAGE" ] && { toolchain; shell=bash; }
+    # bornes volontaires : sur un portail ouvert, un visiteur ne doit pas pouvoir accaparer
+    # la machine (boucle infinie, fork bomb, minage)
     docker run --rm "${tty[@]}" --init -v "$(host_path "$dir"):/work" -w /work \
+        --security-opt no-new-privileges --pids-limit 512 \
+        --memory "${CURSUS_MEM:-1g}" --cpus "${CURSUS_CPUS:-1.5}" \
         ${extra[@]+"${extra[@]}"} "$img" "$shell" -c "$script" _ "$@"
 }
 DOCKER_ARGS=()
@@ -398,6 +402,23 @@ web() {
     read -r _ || true
 }
 
+# Arrete ce qui traine : un visiteur ferme son onglet sans rien arreter, et sur un portail
+# ouvert un conteneur oublie tournerait indefiniment.
+reap() {
+    local max_projet="${1:-20}" max_stack="${2:-60}" id age nom
+    for id in $(docker ps -q --filter "ancestor=$IMAGE" --filter "ancestor=node:20-alpine"); do
+        age=$(( ( $(date +%s) - $(date -d "$(docker inspect -f '{{.State.StartedAt}}' "$id")" +%s) ) / 60 ))
+        [ "$age" -ge "$max_projet" ] && { nom=$(docker inspect -f '{{.Name}}' "$id"); info "arret de$nom (${age} min)"; docker rm -f "$id" >/dev/null; }
+    done
+    for s in $STACKS; do
+        id=$(compose "$s" ps -q 2>/dev/null | head -1); [ -z "$id" ] && continue
+        age=$(( ( $(date +%s) - $(date -d "$(docker inspect -f '{{.State.StartedAt}}' "$id")" +%s) ) / 60 ))
+        [ "$age" -ge "$max_stack" ] && { info "arret de $s (${age} min)"; compose "$s" down >/dev/null 2>&1 || true; }
+    done
+    docker container prune -f >/dev/null 2>&1 || true
+    return 0
+}
+
 stop_all() {
     for s in $STACKS; do compose "$s" down 2>/dev/null || true; done
     docker ps -q --filter "ancestor=$IMAGE" | xargs -r docker stop >/dev/null
@@ -425,6 +446,7 @@ main() {
         menu)                  menu ;;
         web)                   web "$@" ;;
         stop-all)              stop_all ;;
+        reap)                  reap "$@" ;;
         stop)                  [ "${1:-}" = portal ] && { docker rm -f "$PORTAL" >/dev/null; exit 0; }
                                compose "${1:?stack ?}" down ;;
         libft|ft_printf|printf|gnl|get_next_line) run_lib "$cmd" "$@" ;;
