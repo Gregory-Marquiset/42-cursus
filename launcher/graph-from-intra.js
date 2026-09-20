@@ -148,54 +148,48 @@ const shapeDist = (n, [x, y]) => {
   return Math.max(0, Math.hypot(dx, dy) - 60);
 };
 const SNAP = 30;   // marge etroite : mieux vaut un lien en moins qu'un lien invente
-const edges = [];
-const seen = new Set();
-for (const p of placed) {
-  for (const link of p.by || []) {
-    const child = resolve(p.id);
-    if (!child || !link.points) continue;
-    const far = link.points.find((q) => Math.hypot(q[0] - p.x, q[1] - p.y) > 1) || link.points[0];
-    const known = resolve(idByProject.get(link.parent_id));
-    const onCore = Math.abs(Math.hypot(far[0] - center.x, far[1] - center.y) - core) <= 30;
-    // parent nomme, mais l'intra n'a dessine qu'une amorce qui ne va pas jusqu'a lui : la relier
-    // en entier tracerait une droite a travers tout le graph, qui n'existe pas sur l'intra
-    let parent = known && shapeDist(known, far) <= SNAP ? known : null;
-    if (!parent && !onCore) {
-      const [best] = nodes
-        .filter((n) => n !== child)
-        .map((n) => ({ n, d: shapeDist(n, far) }))
-        .sort((a, b) => a.d - b.d);
-      if (best && best.d <= SNAP) parent = best.n;
-    }
-    if (!parent && !onCore) continue;                       // parent introuvable : lien abandonne
-    if (parent && parent.id === child.id) continue;
-    const key = (parent ? parent.id : "racine") + ">" + child.id;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    edges.push({
-      ...(parent ? { from: parent.id } : {}),
-      to: child.id,
-      points: parent ? [[parent.x, parent.y], [child.x, child.y]] : link.points,
-      done: !!parent && parent.state === "done" && child.state === "done",
-    });
-  }
-}
-
 for (const [slug, at] of Object.entries(PINNED)) {
   const n = nodes.find((x) => x.slug === slug);
   if (!n || !ringRadii[at.ring - 1]) continue;
   const r = ringRadii[at.ring - 1], a = (at.angle * Math.PI) / 180;
   n.x = Math.round(center.x + r * Math.cos(a));
   n.y = Math.round(center.y + r * Math.sin(a));
-  for (let i = edges.length - 1; i >= 0; i--) {
-    const e = edges[i];
-    if (e.to !== n.id && e.from !== n.id) continue;
-    // l'amorce vers le cercle n'a plus lieu d'etre : le projet est maintenant dessus
-    if (!e.from || !e.to) { edges.splice(i, 1); continue; }
-    if (e.to === n.id) e.points = [e.points[0], [n.x, n.y]];
-    else e.points = [[n.x, n.y], e.points[e.points.length - 1]];
+}
+
+// a quoi correspond une extremite de trace : un projet, le cercle du tronc commun, ou rien
+const endpoint = (pt, hint) => {
+  if (hint && shapeDist(hint, pt) <= SNAP) return hint;
+  const [best] = nodes.map((n) => ({ n, d: shapeDist(n, pt) })).sort((a, b) => a.d - b.d);
+  if (best && best.d <= SNAP) return best.n;
+  if (Math.abs(Math.hypot(pt[0] - center.x, pt[1] - center.y) - core) <= 30) return "core";
+  return null;
+};
+
+const edges = [];
+const seen = new Set();
+for (const p of placed) {
+  for (const link of p.by || []) {
+    const child = resolve(p.id);
+    if (!child || !link.points || link.points.length < 2) continue;
+    const a = endpoint(link.points[0], child);
+    const b = endpoint(link.points[link.points.length - 1], resolve(idByProject.get(link.parent_id)));
+    if (!a || !b || a === b) continue;          // une extremite dans le vide : lien abandonne
+    const ends = [a, b].map((e) => (e === "core" ? null : e));
+    const [n1, n2] = ends;
+    const key = (n1 ? n1.id : "racine") + ">" + (n2 ? n2.id : "racine");
+    if (seen.has(key) || seen.has((n2 ? n2.id : "racine") + ">" + (n1 ? n1.id : "racine"))) continue;
+    seen.add(key);
+    // un projet garde son centre ; le cercle garde le point d'origine du trace
+    const pts = [n1 ? [n1.x, n1.y] : link.points[0], n2 ? [n2.x, n2.y] : link.points[link.points.length - 1]];
+    edges.push({
+      ...(n2 ? { from: n2.id } : {}),
+      ...(n1 ? { to: n1.id } : {}),
+      points: pts,
+      done: !!n1 && !!n2 && n1.state === "done" && n2.state === "done",
+    });
   }
 }
+
 
 const xs = nodes.map((n) => n.x), ys = nodes.map((n) => n.y);
 const out = {
