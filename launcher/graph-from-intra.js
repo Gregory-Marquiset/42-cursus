@@ -157,7 +157,9 @@ for (const p of placed) {
     const far = link.points.find((q) => Math.hypot(q[0] - p.x, q[1] - p.y) > 1) || link.points[0];
     const known = resolve(idByProject.get(link.parent_id));
     const onCore = Math.abs(Math.hypot(far[0] - center.x, far[1] - center.y) - core) <= 30;
-    let parent = known;
+    // parent nomme, mais l'intra n'a dessine qu'une amorce qui ne va pas jusqu'a lui : la relier
+    // en entier tracerait une droite a travers tout le graph, qui n'existe pas sur l'intra
+    let parent = known && shapeDist(known, far) <= SNAP ? known : null;
     if (!parent && !onCore) {
       const [best] = nodes
         .filter((n) => n !== child)
