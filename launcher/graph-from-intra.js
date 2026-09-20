@@ -26,6 +26,7 @@ const RUNNABLE = {
   "inception": ["inception"],
   "ft_transcendence": ["ft_transcendence"],
   "42cursus-cloud-1": ["cloud-1"],
+  "42cursus-swifty-proteins": ["swifty-proteins"],
 };
 // les dix modules C++ pointent vers le meme projet, chacun sur son module
 for (let i = 0; i <= 9; i++) {

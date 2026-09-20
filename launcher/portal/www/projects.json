@@ -39,7 +39,8 @@
         ]
       },
       "fr": "Ma propre bibliothèque C : réécriture d'une partie de la libc (mémoire, chaînes, conversions) et des listes chaînées. Elle sert de base à tous les projets suivants.",
-      "en": "My own C library: a rewrite of part of libc (memory, strings, conversions) plus linked lists. Every later project builds on it."
+      "en": "My own C library: a rewrite of part of libc (memory, strings, conversions) plus linked lists. Every later project builds on it.",
+      "subject": "projects/libft/subject.pdf"
     },
     "ft_printf": {
       "path": "projects/ft_printf",
@@ -53,7 +54,8 @@
         ]
       },
       "fr": "Réimplémentation de printf avec les fonctions variadiques, bonus compris : largeur, précision, drapeaux -0.# +. La démo compare chaque ligne à la vraie printf.",
-      "en": "printf reimplemented with variadic functions, bonus included: width, precision, -0.# + flags. The demo checks every line against the real printf."
+      "en": "printf reimplemented with variadic functions, bonus included: width, precision, -0.# + flags. The demo checks every line against the real printf.",
+      "subject": "projects/ft_printf/subject.pdf"
     },
     "get_next_line": {
       "path": "projects/get_next_line",
@@ -68,7 +70,8 @@
         ]
       },
       "fr": "Lire un fichier ligne par ligne, quelle que soit la taille du buffer, en gardant le reste entre deux appels. La démo lit le code source de get_next_line avec BUFFER_SIZE=7.",
-      "en": "Read a file line by line whatever the buffer size, keeping leftovers between calls. The demo reads get_next_line's own source with BUFFER_SIZE=7."
+      "en": "Read a file line by line whatever the buffer size, keeping leftovers between calls. The demo reads get_next_line's own source with BUFFER_SIZE=7.",
+      "subject": "projects/get_next_line/subject.pdf"
     },
     "born2beroot": {
       "path": "projects/born2beroot",
@@ -80,7 +83,8 @@
         "AppArmor"
       ],
       "fr": "Installation durcie d'un serveur Debian en machine virtuelle : partitions LVM chiffrées, politique de mots de passe, sudo journalisé, pare-feu, script de supervision par cron. Le rendu est la signature de la VM : rien à lancer.",
-      "en": "Hardened Debian server install in a VM: encrypted LVM, password policy, logged sudo, firewall, cron monitoring script. The deliverable is the VM signature, so there is nothing to run."
+      "en": "Hardened Debian server install in a VM: encrypted LVM, password policy, logged sudo, firewall, cron monitoring script. The deliverable is the VM signature, so there is nothing to run.",
+      "subject": "projects/born2beroot/subject.pdf"
     },
     "push_swap": {
       "path": "projects/push_swap",
@@ -95,7 +99,8 @@
         ]
       },
       "fr": "Trier une pile avec un jeu d'opérations limité et le moins de coups possible (algorithme par coût minimal), plus le checker en bonus. La démo trie 500 nombres aléatoires.",
-      "en": "Sort a stack with a restricted instruction set in as few moves as possible (cheapest-move algorithm), with the bonus checker. The demo sorts 500 random numbers."
+      "en": "Sort a stack with a restricted instruction set in as few moves as possible (cheapest-move algorithm), with the bonus checker. The demo sorts 500 random numbers.",
+      "subject": "projects/push_swap/subject.pdf"
     },
     "minitalk": {
       "path": "projects/minitalk",
@@ -109,7 +114,8 @@
         ]
       },
       "fr": "Un client envoie un message à un serveur bit par bit, avec seulement SIGUSR1 et SIGUSR2.",
-      "en": "A client sends a message to a server bit by bit, using nothing but SIGUSR1 and SIGUSR2."
+      "en": "A client sends a message to a server bit by bit, using nothing but SIGUSR1 and SIGUSR2.",
+      "subject": "projects/minitalk/subject.pdf"
     },
     "fdf": {
       "path": "projects/fdf",
@@ -197,7 +203,8 @@
             "reset everything"
           ]
         ]
-      }
+      },
+      "subject": "projects/fdf/subject.pdf"
     },
     "philosophers": {
       "path": "projects/philosophers",
@@ -218,7 +225,8 @@
         ]
       },
       "fr": "Le dîner des philosophes : des threads et des mutex (des processus et des sémaphores en bonus), sans data race ni interblocage, avec une mort détectée à 10 ms près.",
-      "en": "The dining philosophers: threads and mutexes (processes and semaphores for the bonus), with no data races or deadlocks and deaths detected within 10 ms."
+      "en": "The dining philosophers: threads and mutexes (processes and semaphores for the bonus), with no data races or deadlocks and deaths detected within 10 ms.",
+      "subject": "projects/philosophers/subject.pdf"
     },
     "minishell": {
       "path": "projects/minishell",
@@ -251,7 +259,8 @@
             "leave the shell"
           ]
         ]
-      }
+      },
+      "subject": "projects/minishell/subject.pdf"
     },
     "netpractice": {
       "path": "projects/netpractice",
@@ -261,7 +270,8 @@
         "routing"
       ],
       "fr": "Dix exercices de configuration réseau : adressage IP, masques, passerelles, tables de routage. Les solutions sont les fichiers JSON des niveaux : rien à lancer.",
-      "en": "Ten network configuration exercises: IP addressing, masks, gateways, routing tables. The solutions are the level JSON files, so there is nothing to run."
+      "en": "Ten network configuration exercises: IP addressing, masks, gateways, routing tables. The solutions are the level JSON files, so there is nothing to run.",
+      "subject": "projects/netpractice/subject.pdf"
     },
     "cub3d": {
       "path": "projects/cub3d",
@@ -328,7 +338,8 @@
             "quit"
           ]
         ]
-      }
+      },
+      "subject": "projects/cub3d/subject.pdf"
     },
     "cpp": {
       "path": "projects/cpp-modules",
@@ -344,7 +355,49 @@
         ]
       },
       "fr": "La piscine C++, modules 00 à 09 : classes, forme canonique, héritage, polymorphisme, exceptions, casts, templates, conteneurs de la STL. Le lancement demande quel module et quel exercice exécuter.",
-      "en": "The C++ piscine, modules 00 to 09: classes, canonical form, inheritance, polymorphism, exceptions, casts, templates, STL containers. Running it asks which module and exercise to build."
+      "en": "The C++ piscine, modules 00 to 09: classes, canonical form, inheritance, polymorphism, exceptions, casts, templates, STL containers. Running it asks which module and exercise to build.",
+      "subjects": [
+        [
+          "Module 00",
+          "projects/cpp-modules/cpp_00/subject.pdf"
+        ],
+        [
+          "Module 01",
+          "projects/cpp-modules/cpp_01/subject.pdf"
+        ],
+        [
+          "Module 02",
+          "projects/cpp-modules/cpp_02/subject.pdf"
+        ],
+        [
+          "Module 03",
+          "projects/cpp-modules/cpp_03/subject.pdf"
+        ],
+        [
+          "Module 04",
+          "projects/cpp-modules/cpp_04/subject.pdf"
+        ],
+        [
+          "Module 05",
+          "projects/cpp-modules/cpp_05/subject.pdf"
+        ],
+        [
+          "Module 06",
+          "projects/cpp-modules/cpp_06/subject.pdf"
+        ],
+        [
+          "Module 07",
+          "projects/cpp-modules/cpp_07/subject.pdf"
+        ],
+        [
+          "Module 08",
+          "projects/cpp-modules/cpp_08/subject.pdf"
+        ],
+        [
+          "Module 09",
+          "projects/cpp-modules/cpp_09/subject.pdf"
+        ]
+      ]
     },
     "webserv": {
       "path": "projects/webserv",
@@ -371,7 +424,8 @@
         ]
       },
       "fr": "Un serveur HTTP non bloquant écrit de zéro, avec une seule boucle epoll : fichier de configuration à la nginx, GET/POST/DELETE, upload, CGI (Python, Perl, PHP, Node), sessions et plusieurs ports.",
-      "en": "A non-blocking HTTP server from scratch on a single epoll loop: nginx-style config, GET/POST/DELETE, uploads, CGI (Python, Perl, PHP, Node), sessions, multiple ports."
+      "en": "A non-blocking HTTP server from scratch on a single epoll loop: nginx-style config, GET/POST/DELETE, uploads, CGI (Python, Perl, PHP, Node), sessions, multiple ports.",
+      "subject": "projects/webserv/subject.pdf"
     },
     "inception": {
       "path": "projects/inception",
@@ -398,7 +452,8 @@
         ]
       },
       "fr": "Toute une infrastructure en conteneurs, chaque image écrite à la main à partir d'Alpine : nginx en TLS, WordPress sur php-fpm, MariaDB, secrets Docker. Bonus : Redis, FTP, Adminer, Portainer et un site statique.",
-      "en": "A whole containerised infrastructure, every image hand-written from Alpine: nginx over TLS, WordPress on php-fpm, MariaDB, Docker secrets. Bonus: Redis, FTP, Adminer, Portainer and a static site."
+      "en": "A whole containerised infrastructure, every image hand-written from Alpine: nginx over TLS, WordPress on php-fpm, MariaDB, Docker secrets. Bonus: Redis, FTP, Adminer, Portainer and a static site.",
+      "subject": "projects/inception/subject.pdf"
     },
     "ft_transcendence": {
       "path": "projects/ft_transcendence",
@@ -438,7 +493,8 @@
         ]
       },
       "fr": "Une plateforme web complète qui transforme le cursus 42 en jeu (défis, XP, badges, chat en temps réel), découpée en microservices. Côté DevOps : secrets dans Vault, WAF ModSecurity, métriques Prometheus/Grafana, sauvegardes, CI.",
-      "en": "A full web platform that gamifies the 42 cursus (challenges, XP, badges, real-time chat), split into microservices. On the DevOps side: secrets in Vault, ModSecurity WAF, Prometheus/Grafana metrics, backups, CI."
+      "en": "A full web platform that gamifies the 42 cursus (challenges, XP, badges, real-time chat), split into microservices. On the DevOps side: secrets in Vault, ModSecurity WAF, Prometheus/Grafana metrics, backups, CI.",
+      "subject": "projects/ft_transcendence/subject.pdf"
     },
     "cloud-1": {
       "path": "projects/cloud-1",
@@ -465,6 +521,51 @@
       },
       "fr": "Inception déployé automatiquement sur plusieurs serveurs : Terraform crée les VM et génère l'inventaire, Ansible les provisionne et installe WordPress. Ici, la stack tourne en local ; le déploiement réel est décrit dans le README.",
       "en": "Inception deployed automatically across several servers: Terraform creates the VMs and generates the inventory, Ansible provisions them and installs WordPress. Here the stack runs locally; the README describes the real deployment."
+    },
+    "swifty-proteins": {
+      "path": "projects/swifty-proteins",
+      "stack": [
+        "React Native",
+        "Expo",
+        "three.js",
+        "TypeScript"
+      ],
+      "run": {
+        "args": [
+          "swifty"
+        ],
+        "urls": [
+          [
+            "Expo",
+            "http://localhost:8081"
+          ]
+        ]
+      },
+      "fr": "Une application mobile qui affiche en 3D les ligands de la Protein Data Bank : téléchargement et analyse des fichiers .cif, rendu three.js, couleurs CPK, capture et partage. Connexion par mot de passe (Argon2id) ou biométrie. Le lancement ouvre Expo : scanne le QR code avec Expo Go, ton téléphone doit être sur le même réseau.",
+      "en": "A mobile app that renders ligands from the Protein Data Bank in 3D: .cif download and parsing, three.js rendering, CPK colours, screenshot and sharing. Login by password (Argon2id) or biometrics. Running it opens Expo: scan the QR code with Expo Go, with your phone on the same network.",
+      "controls": {
+        "fr": [
+          [
+            "Expo Go",
+            "scanner le QR code affiché dans le terminal"
+          ],
+          [
+            "Doigt",
+            "tourner, pincer pour zoomer"
+          ]
+        ],
+        "en": [
+          [
+            "Expo Go",
+            "scan the QR code shown in the terminal"
+          ],
+          [
+            "Finger",
+            "rotate, pinch to zoom"
+          ]
+        ]
+      },
+      "subject": "projects/swifty-proteins/subject.pdf"
     }
   }
 }

@@ -38,6 +38,7 @@ does and who I built it with, then hit **Run**:
 | 05 | [webserv](projects/webserv) | Non-blocking HTTP server with CGI | C++98, epoll |
 | 05 | [Inception](projects/inception) | Containerised WordPress infrastructure, every image hand-written | Docker |
 | 06 | [ft_transcendence](projects/ft_transcendence) | Full microservices web platform | Node, React, Vault, Prometheus |
+| 06 | [swifty-proteins](projects/swifty-proteins) | 3D ligand viewer for phones, from the Protein Data Bank | React Native, Expo, three.js |
 | — | [Cloud-1](projects/cloud-1) | Inception deployed automatically on several servers | Terraform, Ansible |
 
 ### Built with
@@ -67,6 +68,7 @@ Everything in the web page is also available from a terminal:
 ./cursus minitalk "hello"                      # server + client
 ./cursus philo philo 5 800 200 200 7           # version, then the program's arguments
 ./cursus minishell
+./cursus swifty                                # Expo: scan the QR code with Expo Go
 ./cursus fdf mars                              # opens a screen on http://localhost:6080
 ./cursus cub3d bonus
 ./cursus cpp 09 01 "8 9 * 9 - 9 - 9 - 4 - 1 +" # module, exercise, arguments  -> 42
@@ -91,6 +93,8 @@ Everything in the web page is also available from a terminal:
                │                   Xvfb + noVNC for MiniLibX projects
                └─ docker compose: Inception, ft_transcendence, Cloud-1
 ```
+
+- Each project page links its **subject**, the PDF handed out by 42.
 
 - **Same compiler as the school.** `cc` and `c++` are clang 12 on Ubuntu 22.04, like 42's
   workstations. Newer clangs add warnings that break the projects' `-Werror`.

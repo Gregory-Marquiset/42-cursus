@@ -181,7 +181,7 @@ const I18N = {
     exam_desc: "Examen sur machine, sans internet, en temps limité : aucun code rendu.",
     not_here: "Ce projet n'est pas dans ce dépôt.",
     nothing: "Rien à exécuter : le rendu se lit dans le dépôt.", screen: "Écran",
-    controls: "Commandes", mark: "note", st_done: "validé", st_fail: "échoué", st_in_progress: "en cours", st_available: "disponible",
+    controls: "Commandes", subject: "Sujet", mark: "note", st_done: "validé", st_fail: "échoué", st_in_progress: "en cours", st_available: "disponible",
     st_unavailable: "verrouillé", st_not_recommended: "non recommandé",
     legend_source: "positions et notes : mon holy graph sur l'intra 42",
     reload_screen: "Recharger l'écran",
@@ -196,7 +196,7 @@ const I18N = {
     exam_desc: "Timed exam on a school machine without internet: no code submitted.",
     not_here: "This project is not in this repository.",
     nothing: "Nothing to run: the deliverable is in the repo.", screen: "Screen",
-    controls: "Controls", mark: "mark", st_done: "validated", st_fail: "failed", st_in_progress: "ongoing", st_available: "available",
+    controls: "Controls", subject: "Subject", mark: "mark", st_done: "validated", st_fail: "failed", st_in_progress: "ongoing", st_available: "available",
     st_unavailable: "locked", st_not_recommended: "not recommended",
     legend_source: "positions and marks: my holy graph on the 42 intranet",
     reload_screen: "Reload screen",
@@ -361,7 +361,14 @@ function renderPanel() {
     if (args) html += `<button class="primary" id="run">▶ ${t("launch")}</button>`;
     html += `<a class="btn" href="${DATA.repo}/tree/main/${esc(p.path)}" target="_blank" rel="noopener">${t("code")}</a>`;
     if (p.origin) html += `<a class="btn" href="${esc(p.origin)}" target="_blank" rel="noopener">${t("team_repo")}</a>`;
+    // le sujet rendu par 42, servi depuis le depot
+    if (p.subject) html += `<a class="btn" href="/${esc(p.subject)}" target="_blank" rel="noopener">${t("subject")} ↗</a>`;
     html += `</div>`;
+    if (p.subjects) {
+      html += `<h3>${t("subject")}</h3><div class="actions">` + p.subjects
+        .map(([label, href]) => `<a class="btn" href="/${esc(href)}" target="_blank" rel="noopener">${esc(label)}</a>`)
+        .join("") + `</div>`;
+    }
     html += args ? `<code class="cmd">./cursus ${args.map(a => /\s/.test(a) ? `"${esc(a)}"` : esc(a)).join(" ")}</code>`
                  : `<p class="team">${t("nothing")}</p>`;
     if (p.controls) {

@@ -512,7 +512,8 @@
    "state": "done",
    "x": 1934,
    "y": 3852,
-   "mark": 125
+   "mark": 125,
+   "project": "swifty-proteins"
   },
   {
    "id": 852,

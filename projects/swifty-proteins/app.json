@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Swifty Protein",
+    "slug": "swifty-protein",
+    "version": "1.0.0",
+    "scheme": "swiftyprotein",
+    "userInterfaceStyle": "automatic",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hugalito.swiftyprotein",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Swifty Protein utilise Face ID pour deverrouiller votre session."
+      }
+    },
+    "android": {
+      "package": "com.hugalito.swiftyprotein",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B1016",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset",
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Swifty Protein utilise Face ID pour deverrouiller votre session."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#F5F7FA",
+          "dark": {
+            "backgroundColor": "#0B1016"
+          }
+        }
+      ]
+    ]
+  }
+}

@@ -21,3 +21,7 @@ objs/
 objs_and_deps*/
 *.a
 make_interface/
+
+# Dependances installees au lancement
+node_modules/
+.expo/
