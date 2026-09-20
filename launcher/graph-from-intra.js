@@ -133,25 +133,6 @@ for (const p of placed) {
 roots.sort((a, b) => a - b);
 const core = roots.length ? Math.round(roots[Math.floor(roots.length / 2)]) : 1000;
 
-// Les liens. `by` porte le trace, et son point libre dit d'ou part le lien :
-//   - sur le cercle du tronc commun  -> c'est une racine de branche, on garde le trace
-//   - sur un projet (souvent le bord d'une etiquette de piscine) -> on relie les deux centres
-//   - ailleurs -> le parent n'est pas dessine (projet retire ou hors cursus), le lien part avec lui
-// Beaucoup de liens ont `parent_id: 0`, d'ou cette resolution par la geometrie.
-// distance du point au dessin du projet : les piscines et les examens sont de larges etiquettes,
-// et les liens de l'intra s'accrochent a leur bord
-const shapeDist = (n, [x, y]) => {
-  const dx = Math.abs(x - n.x), dy = Math.abs(y - n.y);
-  // les piscines sont de larges etiquettes, et leurs liens s'accrochent au bord du cadre
-  if (n.kind === "piscine") {
-    return Math.hypot(Math.max(0, dx - (n.name.length * 14 + 20)), Math.max(0, dy - 90));
-  }
-  // les examens n'ont pas d'enfants : cadre etroit, sinon ils happent les racines qui passent
-  // a cote d'eux, le dernier anneau etant juste sous le cercle du tronc commun
-  if (n.kind === "exam") return Math.hypot(Math.max(0, dx - 80), Math.max(0, dy - 25));
-  return Math.max(0, Math.hypot(dx, dy) - 60);
-};
-const SNAP = 30;   // marge etroite : mieux vaut un lien en moins qu'un lien invente
 for (const [slug, at] of Object.entries(PINNED)) {
   const n = nodes.find((x) => x.slug === slug);
   if (!n || !ringRadii[at.ring - 1]) continue;
