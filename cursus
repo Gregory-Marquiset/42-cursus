@@ -376,8 +376,11 @@ portal() {
     docker build -q -t 42-cursus/portal "$(host_path "$ROOT/launcher/portal")" >/dev/null
     toolchain
     docker rm -f "$PORTAL" >/dev/null 2>&1 || true
-    docker run -d --name "$PORTAL" -p 127.0.0.1:4242:4242 \
-        -v /var/run/docker.sock:/var/run/docker.sock \
+    # en Docker rootless, le socket vit dans le runtime de l'utilisateur, pas dans /var/run
+    local sock="${DOCKER_HOST#unix://}"; [ -S "$sock" ] || sock=/var/run/docker.sock
+    # CURSUS_BIND : 0.0.0.0 pour publier derriere un reverse proxy, sinon la machine seule
+    docker run -d --name "$PORTAL" -p "${CURSUS_BIND:-127.0.0.1}:4242:4242" \
+        -v "$sock:/var/run/docker.sock" \
         -v "$(host_path "$ROOT"):$dp" -e CURSUS_ROOT="$dp" -e CURSUS_HOST_IP="$(host_ip)" \
         42-cursus/portal >/dev/null
     info "Portail : ${B}http://localhost:4242${N}   (arret : ./cursus stop portal)"
