@@ -384,7 +384,8 @@ portal() {
         -v "$(host_path "$ROOT"):$dp" -e CURSUS_ROOT="$dp" -e CURSUS_HOST_IP="$(host_ip)" \
         42-cursus/portal >/dev/null
     info "Portail : ${B}http://localhost:4242${N}   (arret : ./cursus stop portal)"
-    [ -z "${CURSUS_NO_BROWSER:-}" ] && open_url "http://localhost:4242"
+    # CURSUS_NO_BROWSER : sur un serveur, il n'y a pas de navigateur a ouvrir
+    if [ -z "${CURSUS_NO_BROWSER:-}" ]; then open_url "http://localhost:4242"; fi
 }
 
 # Point d'entree du terminal web : lance la commande demandee par la page, puis garde la sortie
