@@ -55,6 +55,9 @@ split_args() { set -f; eval "ARGV=($1)"; set +f; }
 
 rand() { (set +o pipefail; LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "${1:-20}"); }
 
+# Un lancement precedent tient peut-etre encore le port : on lui laisse la place
+free_port() { docker ps -q --filter "publish=$1" | xargs -r docker rm -f >/dev/null 2>&1 || true; }
+
 # Adresse de cette machine sur le reseau local : un telephone doit pouvoir l'atteindre (Expo).
 # Depuis le portail, elle est passee par le lanceur, qui lui tourne sur la machine.
 host_ip() {
@@ -106,6 +109,7 @@ run_cpp() {
 run_webserv() {
     local conf="${1:-files/valid/webServ.conf}"
     local port; port="$(sed -n 's/^[[:space:]]*listen[[:space:]]\{1,\}\([0-9]\{1,\}\);.*/\1/p' "$P/webserv/$conf" | head -1)"
+    free_port "${port:-1045}"
     DOCKER_ARGS=(-p "${port:-1045}:${port:-1045}")
     info "webserv sur ${B}http://localhost:${port:-1045}${N}  (Ctrl+C pour arreter)"
     build_run "$P/webserv" webserv "$conf"
@@ -160,8 +164,7 @@ run_minishell() {
 # fdf / cub3d : MiniLibX dans un ecran virtuel, affiche dans le navigateur par noVNC
 run_gui() {
     local prj="$1" bin="$2" arg="$3"
-    # un seul ecran a la fois : sinon le suivant ne peut pas prendre les ports 6080/6081
-    docker ps -q --filter "publish=6080" | xargs -r docker rm -f >/dev/null 2>&1 || true
+    free_port 6080          # un seul ecran a la fois
     DOCKER_ARGS=(--name 42-cursus-gui -p 127.0.0.1:6080:6080 -p 127.0.0.1:6081:6081
                  -v "$(host_path "$ROOT/launcher"):/launcher:ro")
     info "$prj s'affiche dans le navigateur : ${B}http://localhost:6080/vnc.html?autoconnect=1&resize=scale${N}"
@@ -171,6 +174,7 @@ run_gui() {
 # Application React Native : Expo sert le bundle, le telephone le charge en scannant le QR code
 run_swifty() {
     local ip; ip="$(host_ip)"
+    free_port 8081
     BOX_IMAGE=node:20-alpine
     # sans cette adresse, Expo annonce celle du conteneur, que le telephone ne peut pas joindre
     DOCKER_ARGS=(-p 8081:8081 -e EXPO_NO_TELEMETRY=1 -e "REACT_NATIVE_PACKAGER_HOSTNAME=$ip")

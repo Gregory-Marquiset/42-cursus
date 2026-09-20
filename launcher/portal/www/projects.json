@@ -533,12 +533,6 @@
       "run": {
         "args": [
           "swifty"
-        ],
-        "urls": [
-          [
-            "Expo",
-            "http://localhost:8081"
-          ]
         ]
       },
       "fr": "Une application mobile qui affiche en 3D les ligands de la Protein Data Bank : téléchargement et analyse des fichiers .cif, rendu three.js, couleurs CPK, capture et partage. Connexion par mot de passe (Argon2id) ou biométrie. Le lancement ouvre Expo : scanne le QR code avec Expo Go, ton téléphone doit être sur le même réseau.",
