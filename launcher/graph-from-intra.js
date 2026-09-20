@@ -142,9 +142,13 @@ const core = roots.length ? Math.round(roots[Math.floor(roots.length / 2)]) : 10
 // et les liens de l'intra s'accrochent a leur bord
 const shapeDist = (n, [x, y]) => {
   const dx = Math.abs(x - n.x), dy = Math.abs(y - n.y);
-  if (n.kind === "piscine" || n.kind === "exam") {
+  // les piscines sont de larges etiquettes, et leurs liens s'accrochent au bord du cadre
+  if (n.kind === "piscine") {
     return Math.hypot(Math.max(0, dx - (n.name.length * 14 + 20)), Math.max(0, dy - 90));
   }
+  // les examens n'ont pas d'enfants : cadre etroit, sinon ils happent les racines qui passent
+  // a cote d'eux, le dernier anneau etant juste sous le cercle du tronc commun
+  if (n.kind === "exam") return Math.hypot(Math.max(0, dx - 80), Math.max(0, dy - 25));
   return Math.max(0, Math.hypot(dx, dy) - 60);
 };
 const SNAP = 30;   // marge etroite : mieux vaut un lien en moins qu'un lien invente
@@ -180,7 +184,13 @@ for (const p of placed) {
     if (seen.has(key) || seen.has((n2 ? n2.id : "racine") + ">" + (n1 ? n1.id : "racine"))) continue;
     seen.add(key);
     // un projet garde son centre ; le cercle garde le point d'origine du trace
-    const pts = [n1 ? [n1.x, n1.y] : link.points[0], n2 ? [n2.x, n2.y] : link.points[link.points.length - 1]];
+    // le bout pose sur le cercle est ramene pile dessus : les traces de l'intra le ratent de quelques unites
+    const onRing = (pt) => {
+      const d = Math.hypot(pt[0] - center.x, pt[1] - center.y) || 1;
+      return [Math.round(center.x + (pt[0] - center.x) * core / d), Math.round(center.y + (pt[1] - center.y) * core / d)];
+    };
+    const pts = [n1 ? [n1.x, n1.y] : onRing(link.points[0]),
+                 n2 ? [n2.x, n2.y] : onRing(link.points[link.points.length - 1])];
     edges.push({
       ...(n2 ? { from: n2.id } : {}),
       ...(n1 ? { to: n1.id } : {}),
