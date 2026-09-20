@@ -123,10 +123,81 @@
           "fdf",
           "42"
         ],
-        "screen": true
+        "screen": true,
+        "mouselook": true
       },
       "fr": "Rendu en fil de fer d'une carte d'altitudes en projection isométrique, avec dégradés de couleur, zoom, rotation et déplacement.",
-      "en": "Isometric wireframe rendering of a height map, with color gradients, zoom, rotation and panning."
+      "en": "Isometric wireframe rendering of a height map, with color gradients, zoom, rotation and panning.",
+      "controls": {
+        "fr": [
+          [
+            "Pavé numérique + − × ÷",
+            "zoom"
+          ],
+          [
+            "Pavé 8 2 / 4 6 / 7 9",
+            "rotation X / Y / Z"
+          ],
+          [
+            "Pavé 1 3",
+            "exagère les altitudes, 5 les remet"
+          ],
+          [
+            "W A S D",
+            "déplacer la carte"
+          ],
+          [
+            "Q E",
+            "monter / descendre le relief"
+          ],
+          [
+            "I P",
+            "projection isométrique / parallèle"
+          ],
+          [
+            "R G B N",
+            "couleurs, N remet les originales"
+          ],
+          [
+            "Espace",
+            "tout réinitialiser"
+          ]
+        ],
+        "en": [
+          [
+            "Numpad + − × ÷",
+            "zoom"
+          ],
+          [
+            "Numpad 8 2 / 4 6 / 7 9",
+            "rotate X / Y / Z"
+          ],
+          [
+            "Numpad 1 3",
+            "exaggerate heights, 5 resets them"
+          ],
+          [
+            "W A S D",
+            "move the map"
+          ],
+          [
+            "Q E",
+            "raise / lower the relief"
+          ],
+          [
+            "I P",
+            "isometric / parallel projection"
+          ],
+          [
+            "R G B N",
+            "colours, N restores the originals"
+          ],
+          [
+            "Space",
+            "reset everything"
+          ]
+        ]
+      }
     },
     "philosophers": {
       "path": "projects/philosophers",
@@ -166,7 +237,21 @@
         ]
       },
       "fr": "Un shell façon bash : tokenizer, arbre syntaxique, pipes, redirections, heredoc, variables d'environnement, builtins, signaux.",
-      "en": "A bash-like shell: tokenizer, syntax tree, pipes, redirections, heredoc, environment variables, builtins, signals."
+      "en": "A bash-like shell: tokenizer, syntax tree, pipes, redirections, heredoc, environment variables, builtins, signals.",
+      "controls": {
+        "fr": [
+          [
+            "exit",
+            "quitter le shell"
+          ]
+        ],
+        "en": [
+          [
+            "exit",
+            "leave the shell"
+          ]
+        ]
+      }
     },
     "netpractice": {
       "path": "projects/netpractice",
@@ -197,7 +282,53 @@
         "mouselook": true
       },
       "fr": "Un moteur façon Wolfenstein 3D : raycasting DDA, textures par face, collisions, et en bonus minimap, portes et souris.",
-      "en": "A Wolfenstein 3D-style engine: DDA raycasting, per-side textures, collisions, and for the bonus a minimap, doors and mouse look."
+      "en": "A Wolfenstein 3D-style engine: DDA raycasting, per-side textures, collisions, and for the bonus a minimap, doors and mouse look.",
+      "controls": {
+        "fr": [
+          [
+            "W A S D",
+            "avancer, reculer, pas de côté (ZQSD en AZERTY)"
+          ],
+          [
+            "Souris ou flèches ← →",
+            "tourner"
+          ],
+          [
+            "E",
+            "ouvrir et fermer les portes"
+          ],
+          [
+            "P",
+            "couper la souris"
+          ],
+          [
+            "Échap",
+            "quitter"
+          ]
+        ],
+        "en": [
+          [
+            "W A S D",
+            "move around"
+          ],
+          [
+            "Mouse or ← → arrows",
+            "turn"
+          ],
+          [
+            "E",
+            "open and close doors"
+          ],
+          [
+            "P",
+            "toggle mouse look"
+          ],
+          [
+            "Esc",
+            "quit"
+          ]
+        ]
+      }
     },
     "cpp": {
       "path": "projects/cpp-modules",

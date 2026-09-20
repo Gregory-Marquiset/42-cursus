@@ -16,7 +16,7 @@ This opens **http://localhost:4242**: the cursus "holy graph". Click a project t
 does and who I built it with, then hit **Run**:
 
 - programs run in a terminal embedded in the page
-- graphical projects (FdF, cub3D) open a virtual screen next to it
+- graphical projects (FdF, cub3D) open a virtual screen next to it, and the panel lists their controls
 - web stacks (Inception, ft_transcendence, Cloud-1) come up with links to open them
 
 ## Projects

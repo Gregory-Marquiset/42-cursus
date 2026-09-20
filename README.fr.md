@@ -16,7 +16,7 @@ La commande ouvre **http://localhost:4242**, le « holy graph » du cursus. Un c
 affiche ce qu'il fait et avec qui je l'ai réalisé ; le bouton **Lancer** l'exécute :
 
 - les programmes tournent dans un terminal intégré à la page
-- les projets graphiques (FdF, cub3D) ouvrent un écran virtuel à côté
+- les projets graphiques (FdF, cub3D) ouvrent un écran virtuel à côté, avec leurs commandes dans le panneau
 - les stacks web (Inception, ft_transcendence, Cloud-1) démarrent, avec les liens pour les ouvrir
 
 ## Projets

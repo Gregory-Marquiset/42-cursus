@@ -1,4 +1,17 @@
 {
+ "center": {
+  "x": 3001,
+  "y": 3000
+ },
+ "rings": [
+  165,
+  333,
+  499,
+  676,
+  831,
+  982
+ ],
+ "core": 1042,
  "_comment": "Genere par launcher/graph-from-intra.js a partir du holy graph de l'intra 42",
  "bounds": {
   "x0": 1431,

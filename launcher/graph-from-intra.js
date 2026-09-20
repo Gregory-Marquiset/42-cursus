@@ -72,8 +72,25 @@ for (const p of placed) {
   }
 }
 
+// Les anneaux de l'intra : les projets d'un meme rang sont a la meme distance de Libft.
+// On les retrouve en groupant les distances, ce qui evite de les coder en dur.
+const center = nodes.find((n) => n.slug === "42cursus-libft") || nodes[0];
+const dist = (n) => Math.hypot(n.x - center.x, n.y - center.y);
+const rings = [];
+for (const r of nodes.map(dist).sort((a, b) => a - b)) {
+  if (r < 50 || r > 1010) continue;                    // le centre, puis au-dela du tronc commun
+  const last = rings[rings.length - 1];
+  if (last && r - last[last.length - 1] < 60) last.push(r);
+  else rings.push([r]);
+}
+const ringRadii = rings.map((g) => Math.round(g.reduce((a, b) => a + b) / g.length));
+const core = Math.round(Math.max(...nodes.map(dist).filter((r) => r <= 1010)) + 45);
+
 const xs = nodes.map((n) => n.x), ys = nodes.map((n) => n.y);
 const out = {
+  center: { x: center.x, y: center.y },
+  rings: ringRadii,
+  core,
   _comment: "Genere par launcher/graph-from-intra.js a partir du holy graph de l'intra 42",
   bounds: { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) },
   nodes,
