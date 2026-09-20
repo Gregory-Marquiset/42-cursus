@@ -104,32 +104,7 @@ for (const g of nodes.filter((n) => GROUPS.some((x) => x.id === n.id))) {
 const byId = new Map(nodes.map((n) => [n.id, n]));
 const resolve = (id) => (groupId.has(id) ? byId.get(groupId.get(id)) : byId.get(id));
 
-// `by` porte le trace du lien : on le garde tel quel, sauf si une extremite a ete regroupee,
-// auquel cas le trace d'origine ne mene plus au bon endroit et une droite suffit
 const idByProject = new Map(intra.map((p) => [p.project_id, p.id]));
-const edges = [];
-const seen = new Set();
-for (const p of placed) {
-  for (const link of p.by || []) {
-    const parentId = idByProject.get(link.parent_id);
-    const parent = resolve(parentId), child = resolve(p.id);
-    // parent connu mais absent du graph : il a ete retire (projet echoue), le lien part avec lui
-    if (parentId !== undefined && !parent) continue;
-    if (!child || (parent && parent.id === child.id)) continue;
-    const key = (parent ? parent.id : "?" + link.parent_id) + ">" + child.id;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    // une extremite regroupee : le trace d'origine ne mene plus au bon endroit, une droite suffit
-    const moved = groupId.has(p.id) || groupId.has(parentId);
-    if (moved && !parent) continue;
-    edges.push({
-      ...(parent ? { from: parent.id } : {}),
-      to: child.id,
-      points: moved ? [[parent.x, parent.y], [child.x, child.y]] : link.points,
-      done: !!parent && parent.state === "done" && child.state === "done",
-    });
-  }
-}
 
 // Les anneaux de l'intra : les projets d'un meme rang sont a la meme distance de Libft.
 // On les retrouve en groupant les distances, ce qui evite de les coder en dur.
@@ -157,6 +132,52 @@ for (const p of placed) {
 }
 roots.sort((a, b) => a - b);
 const core = roots.length ? Math.round(roots[Math.floor(roots.length / 2)]) : 1000;
+
+// Les liens. `by` porte le trace, et son point libre dit d'ou part le lien :
+//   - sur le cercle du tronc commun  -> c'est une racine de branche, on garde le trace
+//   - sur un projet (souvent le bord d'une etiquette de piscine) -> on relie les deux centres
+//   - ailleurs -> le parent n'est pas dessine (projet retire ou hors cursus), le lien part avec lui
+// Beaucoup de liens ont `parent_id: 0`, d'ou cette resolution par la geometrie.
+// distance du point au dessin du projet : les piscines et les examens sont de larges etiquettes,
+// et les liens de l'intra s'accrochent a leur bord
+const shapeDist = (n, [x, y]) => {
+  const dx = Math.abs(x - n.x), dy = Math.abs(y - n.y);
+  if (n.kind === "piscine" || n.kind === "exam") {
+    return Math.hypot(Math.max(0, dx - (n.name.length * 14 + 20)), Math.max(0, dy - 90));
+  }
+  return Math.max(0, Math.hypot(dx, dy) - 60);
+};
+const SNAP = 30;   // marge etroite : mieux vaut un lien en moins qu'un lien invente
+const edges = [];
+const seen = new Set();
+for (const p of placed) {
+  for (const link of p.by || []) {
+    const child = resolve(p.id);
+    if (!child || !link.points) continue;
+    const far = link.points.find((q) => Math.hypot(q[0] - p.x, q[1] - p.y) > 1) || link.points[0];
+    const known = resolve(idByProject.get(link.parent_id));
+    const onCore = Math.abs(Math.hypot(far[0] - center.x, far[1] - center.y) - core) <= 30;
+    let parent = known;
+    if (!parent && !onCore) {
+      const [best] = nodes
+        .filter((n) => n !== child)
+        .map((n) => ({ n, d: shapeDist(n, far) }))
+        .sort((a, b) => a.d - b.d);
+      if (best && best.d <= SNAP) parent = best.n;
+    }
+    if (!parent && !onCore) continue;                       // parent introuvable : lien abandonne
+    if (parent && parent.id === child.id) continue;
+    const key = (parent ? parent.id : "racine") + ">" + child.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    edges.push({
+      ...(parent ? { from: parent.id } : {}),
+      to: child.id,
+      points: parent ? [[parent.x, parent.y], [child.x, child.y]] : link.points,
+      done: !!parent && parent.state === "done" && child.state === "done",
+    });
+  }
+}
 
 for (const [slug, at] of Object.entries(PINNED)) {
   const n = nodes.find((x) => x.slug === slug);
