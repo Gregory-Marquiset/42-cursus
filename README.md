@@ -125,6 +125,26 @@ The code is what was submitted for evaluation. Anything needed to run it elsewhe
 - Libraries (libft, ft_printf, get_next_line) have no `main`: small demo programs in
   [`launcher/demos/`](launcher/demos) call them.
 
+## Deployment
+
+The portal also runs permanently on a VM in my Proxmox homelab, behind a password:
+[gmarquis-42.duckdns.org](https://gmarquis-42.duckdns.org).
+
+The web terminal runs code, so the machine is treated accordingly:
+
+- **Rootless Docker** — the daemon runs under a dedicated account with no root access to the VM.
+  The low ports some projects need are opened through `net.ipv4.ip_unprivileged_port_start`,
+  not by granting privileges.
+- **One way in** — the firewall only accepts the portal's port from the reverse proxy, which
+  terminates TLS and requires authentication.
+- **The launcher does not trust what it is given** — no `eval`, and every argument (module,
+  exercise, map, config) must match a file in the repository.
+- **Restarts on its own** — a user systemd service brings the portal back at boot.
+
+```bash
+CURSUS_BIND=0.0.0.0 CURSUS_NO_BROWSER=1 ./cursus     # listen for a reverse proxy, no browser
+```
+
 ## Requirements
 
 - Docker with the compose plugin (Docker Desktop on Windows and macOS)

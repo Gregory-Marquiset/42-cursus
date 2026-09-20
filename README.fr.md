@@ -125,6 +125,26 @@ Le code est celui rendu en évaluation. Ce qu'il faut pour le lancer ailleurs se
 - Bibliothèques (libft, ft_printf, get_next_line) : elles n'ont pas de `main`, de petits
   programmes de démo dans [`launcher/demos/`](launcher/demos) les appellent.
 
+## Déploiement
+
+Le portail tourne aussi en permanence sur une VM de mon homelab Proxmox, derrière un mot de
+passe : [gmarquis-42.duckdns.org](https://gmarquis-42.duckdns.org).
+
+Le terminal web exécute du code, donc la machine est traitée comme telle :
+
+- **Docker sans privilèges** — le démon tourne en mode rootless sous un compte dédié, sans accès
+  root à la VM. Les ports bas nécessaires aux projets sont ouverts par
+  `net.ipv4.ip_unprivileged_port_start`, pas par une élévation de privilèges.
+- **Un seul chemin d'entrée** — le pare-feu n'accepte le port du portail que depuis le reverse
+  proxy, qui termine le TLS et exige une authentification.
+- **Le lanceur ne fait pas confiance à ce qu'on tape** — pas d'`eval`, et chaque argument reçu
+  (module, exercice, carte, configuration) doit correspondre à un fichier du dépôt.
+- **Redémarrage automatique** — un service systemd utilisateur relance le portail au démarrage.
+
+```bash
+CURSUS_BIND=0.0.0.0 CURSUS_NO_BROWSER=1 ./cursus     # écoute pour un reverse proxy, sans navigateur
+```
+
 ## Prérequis
 
 - Docker avec le plugin compose (Docker Desktop sous Windows et macOS)
