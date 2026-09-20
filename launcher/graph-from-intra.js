@@ -39,12 +39,23 @@ if (!input) {
 }
 const intra = JSON.parse(fs.readFileSync(input, "utf8"));
 
-// les projets sans position (x = y = 0) ne sont pas places sur le graph de l'intra : on les ecarte
-const placed = intra.filter((p) => p.x || p.y);
-const byProjectId = new Map(placed.map((p) => [p.project_id, p]));
-const nodes = placed.map((p) => {
+// Les dix modules C++ se chevauchent sur le graph : ils deviennent deux groupes, places au
+// centre de leurs membres, comme les piscines de l'intra.
+const GROUPS = [
+  { id: "cpp-00-04", name: "CPP 00–04", is: (s) => /^cpp-module-0[0-4]$/.test(s), project: "cpp", args: ["cpp"] },
+  { id: "cpp-05-09", name: "CPP 05–09", is: (s) => /^cpp-module-0[5-9]$/.test(s), project: "cpp", args: ["cpp"] },
+];
+
+// projets sans position (x = y = 0) : pas places sur le graph de l'intra
+// projets echoues : Greg ne veut pas les afficher
+const placed = intra.filter((p) => (p.x || p.y) && p.state !== "fail");
+const groupOf = (p) => GROUPS.find((g) => g.is(p.slug));
+
+const nodes = [];
+for (const p of placed) {
+  if (groupOf(p)) continue;
   const [project, args] = RUNNABLE[p.slug] || [];
-  return {
+  nodes.push({
     id: p.id,
     name: p.name,
     slug: p.slug,
@@ -55,19 +66,63 @@ const nodes = placed.map((p) => {
     ...(p.final_mark != null ? { mark: p.final_mark } : {}),
     ...(project ? { project } : {}),
     ...(args ? { args } : {}),
-  };
-});
+  });
+}
+const groupId = new Map();        // id d'origine -> id du groupe
+for (const g of GROUPS) {
+  const members = placed.filter((p) => g.is(p.slug));
+  if (!members.length) continue;
+  members.forEach((m) => groupId.set(m.id, g.id));
+  const avg = (f) => Math.round(members.reduce((a, m) => a + f(m), 0) / members.length);
+  const marks = members.map((m) => m.final_mark).filter((m) => m != null);
+  nodes.push({
+    id: g.id, name: g.name, slug: g.id, kind: "piscine",
+    state: members.every((m) => m.state === "done") ? "done" : members[0].state,
+    x: avg((m) => m.x), y: avg((m) => m.y),
+    ...(marks.length ? { mark: Math.round(marks.reduce((a, b) => a + b) / marks.length) } : {}),
+    project: g.project, args: g.args,
+  });
+}
 
-// `by` porte deja le trace du lien : on ne recalcule rien, on garde les points de l'intra
+// un groupe tombe au milieu de ses membres, parfois sur un voisin : on l'ecarte du centre
+// du graph jusqu'a ce qu'il ait la place
+const libft = nodes.find((n) => n.slug === "42cursus-libft") || nodes[0];
+for (const g of nodes.filter((n) => GROUPS.some((x) => x.id === n.id))) {
+  const others = nodes.filter((n) => n !== g);
+  const near = () => Math.min(...others.map((n) => Math.hypot(n.x - g.x, n.y - g.y)));
+  const a = Math.atan2(g.y - libft.y, g.x - libft.x);
+  for (let step = 0; step < 40 && near() < 150; step++) {
+    g.x = Math.round(g.x + 15 * Math.cos(a));
+    g.y = Math.round(g.y + 15 * Math.sin(a));
+  }
+}
+
+const byId = new Map(nodes.map((n) => [n.id, n]));
+const resolve = (id) => (groupId.has(id) ? byId.get(groupId.get(id)) : byId.get(id));
+
+// `by` porte le trace du lien : on le garde tel quel, sauf si une extremite a ete regroupee,
+// auquel cas le trace d'origine ne mene plus au bon endroit et une droite suffit
+const idByProject = new Map(intra.map((p) => [p.project_id, p.id]));
 const edges = [];
+const seen = new Set();
 for (const p of placed) {
   for (const link of p.by || []) {
-    const parent = byProjectId.get(link.parent_id);
+    const parentId = idByProject.get(link.parent_id);
+    const parent = resolve(parentId), child = resolve(p.id);
+    // parent connu mais absent du graph : il a ete retire (projet echoue), le lien part avec lui
+    if (parentId !== undefined && !parent) continue;
+    if (!child || (parent && parent.id === child.id)) continue;
+    const key = (parent ? parent.id : "?" + link.parent_id) + ">" + child.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    // une extremite regroupee : le trace d'origine ne mene plus au bon endroit, une droite suffit
+    const moved = groupId.has(p.id) || groupId.has(parentId);
+    if (moved && !parent) continue;
     edges.push({
-      from: parent ? parent.id : null,
-      to: p.id,
-      points: link.points,
-      done: p.state === "done" && parent && parent.state === "done",
+      ...(parent ? { from: parent.id } : {}),
+      to: child.id,
+      points: moved ? [[parent.x, parent.y], [child.x, child.y]] : link.points,
+      done: !!parent && parent.state === "done" && child.state === "done",
     });
   }
 }

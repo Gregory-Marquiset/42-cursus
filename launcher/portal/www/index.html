@@ -62,17 +62,14 @@
   .edge { fill: none; stroke: #6d7691; stroke-opacity: .5; stroke-width: 3; }
   .edge.done { stroke: var(--teal); stroke-opacity: .55; }
   .node { cursor: pointer; }
-  .node circle, .node rect { fill: #f3f6fb; stroke: none; transition: filter .15s; }
+  /* tout ce qui n'est pas fait reste en retrait : meme gris, quel que soit l'etat */
+  .node circle, .node rect { fill: #262d42; stroke: none; transition: filter .15s; }
   .node text { font-family: var(--font); text-anchor: middle; dominant-baseline: central;
-               pointer-events: none; fill: #1b2338; font-weight: 600; }
+               pointer-events: none; fill: #8d97b5; font-weight: 600; }
   .node.done circle, .node.done rect { fill: var(--teal); }
   .node.done text { fill: var(--teal-ink); font-weight: 700; }
-  .node.fail circle, .node.fail rect { fill: #cf4638; }
-  .node.fail text, .node.in_progress text { fill: #fff; }
   .node.in_progress circle, .node.in_progress rect { fill: #c98a1e; }
-  .node.not_recommended circle, .node.not_recommended rect { fill: #e7c3a3; }
-  .node.unavailable circle, .node.unavailable rect { fill: #2f3547; }
-  .node.unavailable text { fill: #79839f; }
+  .node.in_progress text { fill: #2a1d02; }
   .node:focus { outline: none; }
   .node:hover circle, .node:focus-visible circle, .node.sel circle { filter: drop-shadow(0 0 14px var(--teal)); }
   .node.sel circle { stroke: #fff; stroke-width: 5; }
@@ -152,9 +149,8 @@
 
 <div class="legend">
   <span><i style="background:var(--teal)"></i><span data-i18n="lg_done"></span></span>
-  <span><i style="background:#cf4638"></i><span data-i18n="lg_exam"></span></span>
-  <span><i style="background:#f3f6fb"></i><i style="background:#e7c3a3"></i><span data-i18n="lg_alt"></span></span>
-  <span><i style="background:#2f3547"></i><span data-i18n="lg_locked"></span></span>
+  <span><i style="background:#c98a1e"></i><span data-i18n="lg_exam"></span></span>
+  <span><i style="background:#262d42"></i><span data-i18n="lg_alt"></span></span>
   <span data-i18n="legend_source"></span>
 </div>
 
@@ -180,7 +176,7 @@ const I18N = {
   fr: {
     tagline: "Mes projets de l'école 42. Clique sur un projet pour le lancer : tout tourne dans Docker.",
     fit: "Recentrer", stopall: "Tout arrêter", close_term: "Fermer",
-    lg_done: "validé", lg_exam: "échoué ou en cours", lg_alt: "pas fait", lg_locked: "verrouillé",
+    lg_done: "validé", lg_exam: "en cours", lg_alt: "pas encore fait",
     launch: "Lancer", code: "Code", team_repo: "Dépôt d'équipe", with: "Avec",
     exam_desc: "Examen sur machine, sans internet, en temps limité : aucun code rendu.",
     not_here: "Ce projet n'est pas dans ce dépôt.",
@@ -195,7 +191,7 @@ const I18N = {
   en: {
     tagline: "My projects from 42 school. Click a project to run it: everything runs in Docker.",
     fit: "Recenter", stopall: "Stop everything", close_term: "Close",
-    lg_done: "validated", lg_exam: "failed or ongoing", lg_alt: "not done", lg_locked: "locked",
+    lg_done: "validated", lg_exam: "ongoing", lg_alt: "not done yet",
     launch: "Run", code: "Code", team_repo: "Team repo", with: "With",
     exam_desc: "Timed exam on a school machine without internet: no code submitted.",
     not_here: "This project is not in this repository.",

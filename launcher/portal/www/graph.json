@@ -7,8 +7,8 @@
   165,
   333,
   499,
-  676,
-  831,
+  663,
+  832,
   982
  ],
  "core": 1042,
@@ -95,21 +95,6 @@
    "state": "available",
    "x": 4173,
    "y": 3171
-  },
-  {
-   "id": 7546,
-   "name": "CPP Module 09",
-   "slug": "cpp-module-09",
-   "kind": "project",
-   "state": "done",
-   "x": 2222,
-   "y": 3332,
-   "mark": 100,
-   "project": "cpp",
-   "args": [
-    "cpp",
-    "09"
-   ]
   },
   {
    "id": 955,
@@ -261,16 +246,6 @@
    "y": 3299
   },
   {
-   "id": 5886,
-   "name": "Inception-of-Things",
-   "slug": "inception-of-things",
-   "kind": "project",
-   "state": "fail",
-   "x": 2126,
-   "y": 2209,
-   "mark": 0
-  },
-  {
    "id": 13607,
    "name": "Agent smith",
    "slug": "42cursus-agent-smith",
@@ -316,21 +291,6 @@
    "y": 4483
   },
   {
-   "id": 7218,
-   "name": "CPP Module 08",
-   "slug": "cpp-module-08",
-   "kind": "project",
-   "state": "done",
-   "x": 3220,
-   "y": 2410,
-   "mark": 100,
-   "project": "cpp",
-   "args": [
-    "cpp",
-    "08"
-   ]
-  },
-  {
    "id": 11033,
    "name": "Part_Time II",
    "slug": "part_time-ii",
@@ -338,16 +298,6 @@
    "state": "unavailable",
    "x": 2525,
    "y": 4162
-  },
-  {
-   "id": 872,
-   "name": "ft_irc",
-   "slug": "ft_irc",
-   "kind": "project",
-   "state": "fail",
-   "x": 2628,
-   "y": 2254,
-   "mark": 0
   },
   {
    "id": 873,
@@ -453,16 +403,6 @@
    "y": 3047
   },
   {
-   "id": 858,
-   "name": "miniRT",
-   "slug": "minirt",
-   "kind": "project",
-   "state": "fail",
-   "x": 2452,
-   "y": 2624,
-   "mark": 0
-  },
-  {
    "id": 857,
    "name": "cub3d",
    "slug": "cub3d",
@@ -472,81 +412,6 @@
    "y": 2711,
    "mark": 125,
    "project": "cub3d"
-  },
-  {
-   "id": 869,
-   "name": "CPP Module 06",
-   "slug": "cpp-module-06",
-   "kind": "project",
-   "state": "done",
-   "x": 2399,
-   "y": 3380,
-   "mark": 100,
-   "project": "cpp",
-   "args": [
-    "cpp",
-    "06"
-   ]
-  },
-  {
-   "id": 866,
-   "name": "CPP Module 03",
-   "slug": "cpp-module-03",
-   "kind": "project",
-   "state": "done",
-   "x": 3358,
-   "y": 2348,
-   "mark": 100,
-   "project": "cpp",
-   "args": [
-    "cpp",
-    "03"
-   ]
-  },
-  {
-   "id": 868,
-   "name": "CPP Module 05",
-   "slug": "cpp-module-05",
-   "kind": "project",
-   "state": "done",
-   "x": 2324,
-   "y": 3302,
-   "mark": 100,
-   "project": "cpp",
-   "args": [
-    "cpp",
-    "05"
-   ]
-  },
-  {
-   "id": 865,
-   "name": "CPP Module 02",
-   "slug": "cpp-module-02",
-   "kind": "project",
-   "state": "done",
-   "x": 3276,
-   "y": 2398,
-   "mark": 100,
-   "project": "cpp",
-   "args": [
-    "cpp",
-    "02"
-   ]
-  },
-  {
-   "id": 867,
-   "name": "CPP Module 04",
-   "slug": "cpp-module-04",
-   "kind": "project",
-   "state": "done",
-   "x": 3400,
-   "y": 2366,
-   "mark": 100,
-   "project": "cpp",
-   "args": [
-    "cpp",
-    "04"
-   ]
   },
   {
    "id": 5340,
@@ -560,21 +425,6 @@
    "project": "fdf"
   },
   {
-   "id": 864,
-   "name": "CPP Module 01",
-   "slug": "cpp-module-01",
-   "kind": "project",
-   "state": "done",
-   "x": 3329,
-   "y": 2519,
-   "mark": 100,
-   "project": "cpp",
-   "args": [
-    "cpp",
-    "01"
-   ]
-  },
-  {
    "id": 855,
    "name": "Philosophers",
    "slug": "42cursus-philosophers",
@@ -584,31 +434,6 @@
    "y": 3210,
    "mark": 125,
    "project": "philosophers"
-  },
-  {
-   "id": 1063,
-   "name": "CPP Module 00",
-   "slug": "cpp-module-00",
-   "kind": "project",
-   "state": "done",
-   "x": 3383,
-   "y": 2502,
-   "mark": 100,
-   "project": "cpp",
-   "args": [
-    "cpp",
-    "00"
-   ]
-  },
-  {
-   "id": 5339,
-   "name": "pipex",
-   "slug": "pipex",
-   "kind": "project",
-   "state": "fail",
-   "x": 3219,
-   "y": 2747,
-   "mark": 0
   },
   {
    "id": 5337,
@@ -658,16 +483,6 @@
    "y": 2916,
    "mark": 125,
    "project": "ft_printf"
-  },
-  {
-   "id": 5980,
-   "name": "fract-ol",
-   "slug": "42cursus-fract-ol",
-   "kind": "project",
-   "state": "fail",
-   "x": 3282,
-   "y": 3179,
-   "mark": 0
   },
   {
    "id": 5338,
@@ -845,16 +660,6 @@
    "state": "not_recommended",
    "x": 3305,
    "y": 4369
-  },
-  {
-   "id": 5341,
-   "name": "so_long",
-   "slug": "so_long",
-   "kind": "project",
-   "state": "fail",
-   "x": 3332,
-   "y": 2985,
-   "mark": 0
   },
   {
    "id": 7217,
@@ -1580,21 +1385,6 @@
    "y": 2479
   },
   {
-   "id": 870,
-   "name": "CPP Module 07",
-   "slug": "cpp-module-07",
-   "kind": "project",
-   "state": "done",
-   "x": 2337,
-   "y": 3466,
-   "mark": 100,
-   "project": "cpp",
-   "args": [
-    "cpp",
-    "07"
-   ]
-  },
-  {
    "id": 10503,
    "name": "ft_select",
    "slug": "42cursus-ft_select",
@@ -1724,6 +1514,34 @@
    "state": "unavailable",
    "x": 2503,
    "y": 4026
+  },
+  {
+   "id": "cpp-00-04",
+   "name": "CPP 00–04",
+   "slug": "cpp-00-04",
+   "kind": "piscine",
+   "state": "done",
+   "x": 3349,
+   "y": 2427,
+   "mark": 100,
+   "project": "cpp",
+   "args": [
+    "cpp"
+   ]
+  },
+  {
+   "id": "cpp-05-09",
+   "name": "CPP 05–09",
+   "slug": "cpp-05-09",
+   "kind": "piscine",
+   "state": "done",
+   "x": 2388,
+   "y": 3218,
+   "mark": 100,
+   "project": "cpp",
+   "args": [
+    "cpp"
+   ]
   }
  ],
  "edges": [
@@ -1758,7 +1576,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 13453,
    "points": [
     [
@@ -1773,7 +1590,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 13452,
    "points": [
     [
@@ -1788,7 +1604,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 13454,
    "points": [
     [
@@ -1803,7 +1618,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 1027,
    "points": [
     [
@@ -1833,7 +1647,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 7826,
    "points": [
     [
@@ -1848,7 +1661,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 13740,
    "points": [
     [
@@ -1863,7 +1675,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 946,
    "points": [
     [
@@ -1878,7 +1689,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 973,
    "points": [
     [
@@ -1893,7 +1703,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 1015,
    "points": [
     [
@@ -1908,7 +1717,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 7644,
    "points": [
     [
@@ -1923,7 +1731,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 13826,
    "points": [
     [
@@ -1938,7 +1745,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 9613,
    "points": [
     [
@@ -1948,21 +1754,6 @@
     [
      3884,
      2342
-    ]
-   ],
-   "done": false
-  },
-  {
-   "from": null,
-   "to": 9613,
-   "points": [
-    [
-     3998,
-     2271
-    ],
-    [
-     4152,
-     2255
     ]
    ],
    "done": false
@@ -1983,7 +1774,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 9614,
    "points": [
     [
@@ -1998,7 +1788,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 986,
    "points": [
     [
@@ -2013,7 +1802,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 12048,
    "points": [
     [
@@ -2023,21 +1811,6 @@
     [
      1816,
      3311
-    ]
-   ],
-   "done": false
-  },
-  {
-   "from": null,
-   "to": 5886,
-   "points": [
-    [
-     2126,
-     2209
-    ],
-    [
-     2213,
-     2167
     ]
    ],
    "done": false
@@ -2073,7 +1846,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 13605,
    "points": [
     [
@@ -2103,7 +1875,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 10133,
    "points": [
     [
@@ -2118,22 +1889,6 @@
    "done": false
   },
   {
-   "from": null,
-   "to": 10133,
-   "points": [
-    [
-     3655,
-     4380
-    ],
-    [
-     3426,
-     4368
-    ]
-   ],
-   "done": false
-  },
-  {
-   "from": null,
    "to": 1040,
    "points": [
     [
@@ -2148,7 +1903,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 1040,
    "points": [
     [
@@ -2208,7 +1962,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 1003,
    "points": [
     [
@@ -2238,7 +1991,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 1037,
    "points": [
     [
@@ -2253,7 +2005,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 7706,
    "points": [
     [
@@ -2358,7 +2109,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 987,
    "points": [
     [
@@ -2388,7 +2138,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 9610,
    "points": [
     [
@@ -2403,7 +2152,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 11065,
    "points": [
     [
@@ -2414,7 +2162,8 @@
      2481,
      3855
     ]
-   ]
+   ],
+   "done": false
   },
   {
    "from": 987,
@@ -2432,7 +2181,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 989,
    "points": [
     [
@@ -2447,7 +2195,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 5263,
    "points": [
     [
@@ -2462,7 +2209,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 992,
    "points": [
     [
@@ -2477,7 +2223,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 11064,
    "points": [
     [
@@ -2492,22 +2237,6 @@
    "done": false
   },
   {
-   "from": null,
-   "to": 11064,
-   "points": [
-    [
-     4171,
-     2245
-    ],
-    [
-     3994,
-     2271
-    ]
-   ],
-   "done": false
-  },
-  {
-   "from": null,
    "to": 11062,
    "points": [
     [
@@ -2537,7 +2266,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 7217,
    "points": [
     [
@@ -2567,7 +2295,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 953,
    "points": [
     [
@@ -2582,7 +2309,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 7668,
    "points": [
     [
@@ -2612,7 +2338,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 981,
    "points": [
     [
@@ -2642,7 +2367,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 6198,
    "points": [
     [
@@ -2657,7 +2381,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 7670,
    "points": [
     [
@@ -2672,7 +2395,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 945,
    "points": [
     [
@@ -2687,7 +2409,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 5981,
    "points": [
     [
@@ -2777,7 +2498,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 10643,
    "points": [
     [
@@ -2822,7 +2542,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 5865,
    "points": [
     [
@@ -2837,7 +2556,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 7519,
    "points": [
     [
@@ -2912,7 +2630,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 5264,
    "points": [
     [
@@ -2927,7 +2644,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 5960,
    "points": [
     [
@@ -2972,7 +2688,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 5959,
    "points": [
     [
@@ -2987,7 +2702,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 6041,
    "points": [
     [
@@ -3002,7 +2716,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 6035,
    "points": [
     [
@@ -3062,7 +2775,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 957,
    "points": [
     [
@@ -3077,7 +2789,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 960,
    "points": [
     [
@@ -3092,7 +2803,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 1022,
    "points": [
     [
@@ -3107,7 +2817,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 1009,
    "points": [
     [
@@ -3152,7 +2861,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 1014,
    "points": [
     [
@@ -3347,7 +3055,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 997,
    "points": [
     [
@@ -3362,7 +3069,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 991,
    "points": [
     [
@@ -3377,7 +3083,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 1123,
    "points": [
     [
@@ -3407,7 +3112,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 975,
    "points": [
     [
@@ -3587,7 +3291,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 994,
    "points": [
     [
@@ -3617,7 +3320,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 1002,
    "points": [
     [
@@ -3632,7 +3334,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 10642,
    "points": [
     [
@@ -3647,7 +3348,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 5982,
    "points": [
     [
@@ -3677,7 +3377,6 @@
    "done": false
   },
   {
-   "from": null,
    "to": 1087,
    "points": [
     [
