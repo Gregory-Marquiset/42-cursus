@@ -94,7 +94,7 @@ Tout ce que fait la page existe aussi depuis un terminal :
                └─ docker compose : Inception, ft_transcendence, Cloud-1
 ```
 
-- Chaque fiche projet donne son **sujet**, le PDF distribué par 42.
+- Chaque fiche projet ouvre son **sujet**, le PDF distribué par 42, dans la page.
 
 - **Le compilateur de l'école.** `cc` et `c++` sont clang 12 sous Ubuntu 22.04, comme sur les
   postes de 42. Les clang plus récents ajoutent des warnings qui cassent les `-Werror` des projets.

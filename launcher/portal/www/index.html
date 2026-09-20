@@ -101,6 +101,14 @@
   .keys dd { margin: 0; color: var(--muted); align-self: center; }
   code.cmd { display: block; margin-top: 14px; font: 13px var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; color: var(--muted); word-break: break-all; }
 
+  /* lecteur de sujet : le PDF s'ouvre dans la page, sans quitter le graph */
+  #viewer { position: fixed; inset: 0; z-index: 8; background: rgba(4, 8, 20, .82);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; }
+  #viewer[hidden] { display: none; }
+  #viewer .vbar { display: flex; align-items: center; gap: 8px; width: min(1100px, 100%); }
+  #viewer .vbar strong { margin-right: auto; font-size: 15px; }
+  #viewer iframe { width: min(1100px, 100%); flex: 1; border: 1px solid var(--line); border-radius: var(--radius); background: #1b2030; }
+
   #drawer {
     position: fixed; left: 0; right: 0; bottom: 0; height: min(58vh, 560px); z-index: 7;
     background: var(--bg); border-top: 1px solid var(--line); display: none; flex-direction: column;
@@ -155,6 +163,15 @@
 </div>
 
 <aside id="panel" aria-live="polite"></aside>
+
+<div id="viewer" hidden>
+  <div class="vbar">
+    <strong id="viewer-title"></strong>
+    <a id="viewer-tab" class="btn" target="_blank" rel="noopener">↗</a>
+    <button id="viewer-close" aria-label="close">✕</button>
+  </div>
+  <iframe id="viewer-frame" title="PDF"></iframe>
+</div>
 
 <section id="drawer" aria-label="Terminal">
   <div class="bar">
@@ -361,12 +378,12 @@ function renderPanel() {
     if (args) html += `<button class="primary" id="run">▶ ${t("launch")}</button>`;
     html += `<a class="btn" href="${DATA.repo}/tree/main/${esc(p.path)}" target="_blank" rel="noopener">${t("code")}</a>`;
     if (p.origin) html += `<a class="btn" href="${esc(p.origin)}" target="_blank" rel="noopener">${t("team_repo")}</a>`;
-    // le sujet rendu par 42, servi depuis le depot
-    if (p.subject) html += `<a class="btn" href="/${esc(p.subject)}" target="_blank" rel="noopener">${t("subject")} ↗</a>`;
+    // le sujet rendu par 42, servi depuis le depot et ouvert dans la page
+    if (p.subject) html += `<button class="doc" data-doc="/${esc(p.subject)}">${t("subject")}</button>`;
     html += `</div>`;
     if (p.subjects) {
       html += `<h3>${t("subject")}</h3><div class="actions">` + p.subjects
-        .map(([label, href]) => `<a class="btn" href="/${esc(href)}" target="_blank" rel="noopener">${esc(label)}</a>`)
+        .map(([label, href]) => `<button class="doc" data-doc="/${esc(href)}">${esc(label)}</button>`)
         .join("") + `</div>`;
     }
     html += args ? `<code class="cmd">./cursus ${args.map(a => /\s/.test(a) ? `"${esc(a)}"` : esc(a)).join(" ")}</code>`
@@ -378,9 +395,27 @@ function renderPanel() {
   }
   $("#panel").innerHTML = html;
   $("#panel .close").onclick = closePanel;
+  $("#panel").querySelectorAll("button.doc").forEach(b => {
+    b.onclick = () => openDoc(b.dataset.doc, `${n.name} — ${t("subject")}`);
+  });
   const run = $("#run");
   if (run) run.onclick = () => launch(argsOf(n, p), p.run);
 }
+
+// ---------------------------------------------------------------- lecteur de sujet
+
+function openDoc(href, title) {
+  $("#viewer-title").textContent = title;
+  $("#viewer-tab").href = href;
+  $("#viewer-frame").src = href;
+  $("#viewer").hidden = false;
+}
+function closeDoc() {
+  $("#viewer").hidden = true;
+  $("#viewer-frame").src = "about:blank";   // le PDF n'occupe plus la memoire du navigateur
+}
+$("#viewer-close").onclick = closeDoc;
+$("#viewer").onclick = e => { if (e.target.id === "viewer") closeDoc(); };
 
 // ---------------------------------------------------------------- terminal
 
@@ -533,7 +568,10 @@ $("#lang").onclick = () => { lang = lang === "fr" ? "en" : "fr"; try { localStor
 $("#fit").onclick = fit;
 $("#stopall").onclick = () => launch(["stop-all"]);
 $("#drawer-close").onclick = closeDrawer;
-document.addEventListener("keydown", e => { if (e.key === "Escape") closePanel(); });
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!$("#viewer").hidden) closeDoc(); else closePanel();
+});
 window.addEventListener("resize", fit);
 
 Promise.all([fetch("projects.json").then(r => r.json()), fetch("graph.json").then(r => r.json())])

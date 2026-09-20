@@ -94,7 +94,7 @@ Everything in the web page is also available from a terminal:
                └─ docker compose: Inception, ft_transcendence, Cloud-1
 ```
 
-- Each project page links its **subject**, the PDF handed out by 42.
+- Each project page opens its **subject**, the PDF handed out by 42, right in the page.
 
 - **Same compiler as the school.** `cc` and `c++` are clang 12 on Ubuntu 22.04, like 42's
   workstations. Newer clangs add warnings that break the projects' `-Werror`.
