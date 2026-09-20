@@ -576,8 +576,8 @@
    "slug": "42_collaborative_resume",
    "kind": "project",
    "state": "done",
-   "x": 2435,
-   "y": 3921,
+   "x": 3172,
+   "y": 2033,
    "mark": 100
   },
   {
@@ -2147,20 +2147,6 @@
     [
      1959,
      3283
-    ]
-   ],
-   "done": false
-  },
-  {
-   "to": 11065,
-   "points": [
-    [
-     2435,
-     3921
-    ],
-    [
-     2481,
-     3855
     ]
    ],
    "done": false

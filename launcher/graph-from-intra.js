@@ -84,6 +84,10 @@ for (const g of GROUPS) {
   });
 }
 
+// L'intra affiche le CV collaboratif, une fois valide, sur le dernier anneau du tronc commun,
+// alors que l'export le laisse a l'exterieur. On le remet ou l'intra le dessine.
+const PINNED = { "42_collaborative_resume": { ring: 6, angle: -80 } };
+
 // un groupe tombe au milieu de ses membres, parfois sur un voisin : on l'ecarte du centre
 // du graph jusqu'a ce qu'il ait la place
 const libft = nodes.find((n) => n.slug === "42cursus-libft") || nodes[0];
@@ -153,6 +157,22 @@ for (const p of placed) {
 }
 roots.sort((a, b) => a - b);
 const core = roots.length ? Math.round(roots[Math.floor(roots.length / 2)]) : 1000;
+
+for (const [slug, at] of Object.entries(PINNED)) {
+  const n = nodes.find((x) => x.slug === slug);
+  if (!n || !ringRadii[at.ring - 1]) continue;
+  const r = ringRadii[at.ring - 1], a = (at.angle * Math.PI) / 180;
+  n.x = Math.round(center.x + r * Math.cos(a));
+  n.y = Math.round(center.y + r * Math.sin(a));
+  for (let i = edges.length - 1; i >= 0; i--) {
+    const e = edges[i];
+    if (e.to !== n.id && e.from !== n.id) continue;
+    // l'amorce vers le cercle n'a plus lieu d'etre : le projet est maintenant dessus
+    if (!e.from || !e.to) { edges.splice(i, 1); continue; }
+    if (e.to === n.id) e.points = [e.points[0], [n.x, n.y]];
+    else e.points = [[n.x, n.y], e.points[e.points.length - 1]];
+  }
+}
 
 const xs = nodes.map((n) => n.x), ys = nodes.map((n) => n.y);
 const out = {
