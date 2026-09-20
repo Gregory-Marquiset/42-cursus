@@ -387,7 +387,8 @@ portal() {
     toolchain
     docker rm -f "$PORTAL" >/dev/null 2>&1 || true
     # en Docker rootless, le socket vit dans le runtime de l'utilisateur, pas dans /var/run
-    local sock="${DOCKER_HOST#unix://}"; [ -S "$sock" ] || sock=/var/run/docker.sock
+    local sock="${DOCKER_HOST:-}"; sock="${sock#unix://}"
+    [ -S "$sock" ] || sock=/var/run/docker.sock
     # CURSUS_BIND : 0.0.0.0 pour publier derriere un reverse proxy, sinon la machine seule
     network
     docker run -d --name "$PORTAL" --network "$NET" -p "${CURSUS_BIND:-127.0.0.1}:4242:4242" \
