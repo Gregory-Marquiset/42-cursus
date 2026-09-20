@@ -340,14 +340,11 @@
       ],
       "run": {
         "args": [
-          "cpp",
-          "09",
-          "01",
-          "8 9 * 9 - 9 - 9 - 4 - 1 +"
+          "cpp"
         ]
       },
-      "fr": "La piscine C++, modules 00 à 09 : classes, forme canonique, héritage, polymorphisme, exceptions, casts, templates, conteneurs de la STL. La démo lance RPN (module 09). Pour choisir un autre exercice : ./cursus cpp.",
-      "en": "The C++ piscine, modules 00 to 09: classes, canonical form, inheritance, polymorphism, exceptions, casts, templates, STL containers. The demo runs RPN (module 09); ./cursus cpp picks any other exercise."
+      "fr": "La piscine C++, modules 00 à 09 : classes, forme canonique, héritage, polymorphisme, exceptions, casts, templates, conteneurs de la STL. Le lancement demande quel module et quel exercice exécuter.",
+      "en": "The C++ piscine, modules 00 to 09: classes, canonical form, inheritance, polymorphism, exceptions, casts, templates, STL containers. Running it asks which module and exercise to build."
     },
     "webserv": {
       "path": "projects/webserv",
