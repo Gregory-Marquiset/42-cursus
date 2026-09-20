@@ -38,7 +38,7 @@ affiche ce qu'il fait et avec qui je l'ai réalisé ; le bouton **Lancer** l'ex�
 | 05 | [webserv](projects/webserv) | Serveur HTTP non bloquant avec CGI | C++98, epoll |
 | 05 | [Inception](projects/inception) | Infrastructure WordPress en conteneurs, chaque image écrite à la main | Docker |
 | 06 | [ft_transcendence](projects/ft_transcendence) | Plateforme web complète en microservices | Node, React, Vault, Prometheus |
-| 06 | [swifty-proteins](projects/swifty-proteins) | Visualiseur 3D de ligands sur téléphone, depuis la Protein Data Bank | React Native, Expo, three.js |
+| 06 | [swifty-proteins](projects/swifty-proteins) | Visualiseur 3D de ligands, depuis la Protein Data Bank (se lance depuis un téléphone, pas depuis le portail) | React Native, Expo, three.js |
 | — | [Cloud-1](projects/cloud-1) | Inception déployé automatiquement sur plusieurs serveurs | Terraform, Ansible |
 
 ### Réalisés avec
@@ -68,7 +68,6 @@ Tout ce que fait la page existe aussi depuis un terminal :
 ./cursus minitalk "salut"                      # serveur + client
 ./cursus philo philo 5 800 200 200 7           # version, puis arguments du programme
 ./cursus minishell
-./cursus swifty                                # Expo : scanner le QR code avec Expo Go
 ./cursus fdf mars                              # ouvre un ecran sur http://localhost:6080
 ./cursus cub3d bonus
 ./cursus cpp 09 01 "8 9 * 9 - 9 - 9 - 4 - 1 +" # module, exercice, arguments  -> 42

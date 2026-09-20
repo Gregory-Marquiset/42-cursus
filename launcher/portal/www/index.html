@@ -93,6 +93,8 @@
   .tags span { font-size: 12px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 99px; padding: 2px 9px; color: var(--muted); }
   .team { margin: 14px 0; font-size: 14px; color: var(--muted); }
   .team a { color: var(--text); }
+  .team code { font: 12px var(--mono); color: var(--text); background: var(--bg); border: 1px solid var(--line);
+               border-radius: 5px; padding: 1px 5px; }
   .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
   aside h3 { margin: 22px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
   .keys { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 13px; }
@@ -227,6 +229,8 @@ let DATA, GRAPH, selected = null;
 const t = k => I18N[lang][k];
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// `commande` dans un texte -> <code>commande</code>
+const code = s => esc(s).replace(/`([^`]+)`/g, (_, c) => `<code>${c}</code>`);
 const SVGNS = "http://www.w3.org/2000/svg";
 function el(tag, attrs = {}, parent) {
   const e = document.createElementNS(SVGNS, tag);
@@ -387,7 +391,7 @@ function renderPanel() {
         .join("") + `</div>`;
     }
     html += args ? `<code class="cmd">./cursus ${args.map(a => /\s/.test(a) ? `"${esc(a)}"` : esc(a)).join(" ")}</code>`
-                 : `<p class="team">${t("nothing")}</p>`;
+                 : `<p class="team">${p.note ? code(p.note[lang]) : t("nothing")}</p>`;
     if (p.controls) {
       html += `<h3>${t("controls")}</h3><dl class="keys">` +
         p.controls[lang].map(([k, what]) => `<dt>${esc(k)}</dt><dd>${esc(what)}</dd>`).join("") + `</dl>`;

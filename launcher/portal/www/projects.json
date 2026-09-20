@@ -530,36 +530,13 @@
         "three.js",
         "TypeScript"
       ],
-      "run": {
-        "args": [
-          "swifty"
-        ]
-      },
-      "fr": "Une application mobile qui affiche en 3D les ligands de la Protein Data Bank : téléchargement et analyse des fichiers .cif, rendu three.js, couleurs CPK, capture et partage. Connexion par mot de passe (Argon2id) ou biométrie. Le lancement ouvre Expo : scanne le QR code avec Expo Go, ton téléphone doit être sur le même réseau.",
-      "en": "A mobile app that renders ligands from the Protein Data Bank in 3D: .cif download and parsing, three.js rendering, CPK colours, screenshot and sharing. Login by password (Argon2id) or biometrics. Running it opens Expo: scan the QR code with Expo Go, with your phone on the same network.",
-      "controls": {
-        "fr": [
-          [
-            "Expo Go",
-            "scanner le QR code affiché dans le terminal"
-          ],
-          [
-            "Doigt",
-            "tourner, pincer pour zoomer"
-          ]
-        ],
-        "en": [
-          [
-            "Expo Go",
-            "scan the QR code shown in the terminal"
-          ],
-          [
-            "Finger",
-            "rotate, pinch to zoom"
-          ]
-        ]
-      },
-      "subject": "projects/swifty-proteins/subject.pdf"
+      "fr": "Une application mobile qui affiche en 3D les ligands de la Protein Data Bank : téléchargement et analyse des fichiers .cif, rendu three.js, couleurs CPK, capture et partage. Connexion par mot de passe (Argon2id) ou biométrie.",
+      "en": "A mobile app that renders ligands from the Protein Data Bank in 3D: .cif download and parsing, three.js rendering, CPK colours, screenshot and sharing. Login by password (Argon2id) or biometrics.",
+      "subject": "projects/swifty-proteins/subject.pdf",
+      "note": {
+        "fr": "Rien à lancer depuis cette page : Expo sert le code à un téléphone du même réseau. Pour l'essayer, depuis `projects/swifty-proteins` : `npm install` puis `npx expo start`, et scanner le QR code avec Expo Go.",
+        "en": "Nothing to run from this page: Expo serves the code to a phone on the same network. To try it, from `projects/swifty-proteins`: `npm install` then `npx expo start`, and scan the QR code with Expo Go."
+      }
     }
   }
 }

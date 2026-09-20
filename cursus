@@ -171,19 +171,6 @@ run_gui() {
     info "Ctrl+C ici pour arreter"
     in_box "$P/$prj" "make -s ${4:-} >/dev/null 2>&1 || make ${4:-}; exec sh /launcher/gui.sh ./$bin \"\$@\"" "$arg"
 }
-# Application React Native : Expo sert le bundle, le telephone le charge en scannant le QR code
-run_swifty() {
-    local ip; ip="$(host_ip)"
-    free_port 8081
-    BOX_IMAGE=node:20-alpine
-    # sans cette adresse, Expo annonce celle du conteneur, que le telephone ne peut pas joindre
-    DOCKER_ARGS=(-p 8081:8081 -e EXPO_NO_TELEMETRY=1 -e "REACT_NATIVE_PACKAGER_HOSTNAME=$ip")
-    info "Installe les dependances puis ouvre Expo : scanne le QR code avec ${B}Expo Go${N}"
-    info "Le telephone doit etre sur le meme reseau que cette machine (${B}${ip:-?}${N}). Ctrl+C pour arreter."
-    in_box "$P/swifty-proteins" 'test -d node_modules || npm install --silent
-        exec npx expo start --lan'
-}
-
 run_fdf()   { run_gui fdf fdf "includes/test_maps/${1:-42}.fdf"; }
 run_cub3d() {
     case "${1:-}" in bonus) run_gui cub3d cub3D_bonus maps/map_b.cub bonus ;;
@@ -291,7 +278,6 @@ ${B}42-cursus${N} — lanceur des projets de l'ecole 42
   ./cursus fdf [carte]              wireframe MiniLibX, affiche sur http://localhost:6080
   ./cursus philo [philo|philo_bonus] [args]   ex : ./cursus philo philo 5 800 200 200 7
   ./cursus minishell                shell interactif
-  ./cursus swifty                   application mobile (Expo) : QR code a scanner
   ./cursus cub3d [bonus]            raycaster MiniLibX, affiche sur http://localhost:6080
   ./cursus cpp [module] [exercice] [args]     ex : ./cursus cpp 09 01 "8 9 * 9 - 9 - 9 - 4 - 1 +"
   ./cursus webserv [config]         serveur HTTP sur http://localhost:1045
@@ -311,7 +297,7 @@ menu() {
         echo "  ${Y}Systeme${N}"
         echo "    5) minitalk     6) philosophers   7) minishell"
         echo "  ${Y}Graphique${N}"
-        echo "    8) fdf          9) cub3d         15) swifty-proteins (mobile)"
+        echo "    8) fdf          9) cub3d"
         echo "  ${Y}C++${N}"
         echo "   10) cpp-modules 11) webserv"
         echo "  ${Y}Docker / DevOps${N}"
@@ -324,7 +310,6 @@ menu() {
             6) run_philo ;;          7) run_minishell ;;
             8) run_fdf "$(ask "Carte (42, mars, julia, pyramide...) ?" 42)" ;;
             9) run_cub3d "$(ask "Version (mandatory / bonus) ?" mandatory)" ;;
-            15) run_swifty ;;
             10) run_cpp ;;           11) run_webserv ;;
             12) stack_up inception ;; 13) stack_up transcendence ;; 14) stack_up cloud-1 ;;
             s) status ;;
@@ -414,7 +399,6 @@ main() {
         push_swap)             run_push_swap "$@" ;;
         minitalk)              run_minitalk "$@" ;;
         minishell)             run_minishell ;;
-        swifty|swifty-proteins) run_swifty ;;
         fdf)                   run_fdf "$@" ;;
         cub3d|cub3D)           run_cub3d "$@" ;;
         philo|philosophers)    run_philo "$@" ;;
