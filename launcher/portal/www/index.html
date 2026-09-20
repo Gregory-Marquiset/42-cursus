@@ -98,6 +98,8 @@
   #drawer.open { display: flex; }
   #drawer .bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   #drawer .bar strong { margin-right: auto; font: 13px var(--mono); color: var(--muted); }
+  .sens { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .sens input { width: 90px; accent-color: var(--teal); }
   #drawer .panes { flex: 1; display: flex; min-height: 0; }
   #drawer iframe { border: 0; flex: 1; min-width: 0; background: var(--bg); }
   #drawer .screen { flex: 1.6; min-width: 0; display: flex; position: relative; border-left: 1px solid var(--line); background: #000; }
@@ -167,7 +169,7 @@ const I18N = {
     nothing: "Rien à exécuter : le rendu se lit dans le dépôt.", screen: "Écran",
     ring: r => r >= 7 ? "Hors tronc commun" : "Rang " + String(r).padStart(2, "0"),
     reload_screen: "Recharger l'écran",
-    game: "Mode jeu", game_hint: "Souris capturée — Échap pour la libérer"
+    game: "Mode jeu", game_hint: "Souris capturée — Échap pour la libérer", sensitivity: "Sensibilité"
   },
   en: {
     tagline: "My projects from 42 school. Click a project to run it: everything runs in Docker.",
@@ -179,7 +181,7 @@ const I18N = {
     nothing: "Nothing to run: the deliverable is in the repo.", screen: "Screen",
     ring: r => r >= 7 ? "Beyond the common core" : "Rank " + String(r).padStart(2, "0"),
     reload_screen: "Reload screen",
-    game: "Game mode", game_hint: "Mouse captured — Esc to release"
+    game: "Game mode", game_hint: "Mouse captured — Esc to release", sensitivity: "Sensitivity"
   }
 };
 const SCREEN_URL = "http://localhost:6080/vnc.html?autoconnect=1&resize=scale&reconnect=1";
@@ -342,10 +344,18 @@ function launch(args, run = {}) {
   $("#screen-wrap").hidden = !run.screen;
   screen.src = "about:blank";
   if (run.screen) {
-    if (run.mouselook) links.insertAdjacentHTML("beforeend", `<button class="primary" id="game-on">🎮 ${t("game")}</button> `);
+    if (run.mouselook) links.insertAdjacentHTML("beforeend",
+      `<button class="primary" id="game-on">🎮 ${t("game")}</button>
+       <label class="sens">${t("sensitivity")} <input type="range" id="sens" min="2" max="60" value="${Math.round(game.sens * 100)}"></label> `);
     links.insertAdjacentHTML("beforeend", `<button id="reload-screen">${t("reload_screen")}</button> <a class="btn" href="${SCREEN_URL}" target="_blank" rel="noopener">${t("screen")} ↗</a>`);
     $("#reload-screen").onclick = () => { screen.src = SCREEN_URL; };
-    if (run.mouselook) $("#game-on").onclick = gameOn;
+    if (run.mouselook) {
+      $("#game-on").onclick = gameOn;
+      $("#sens").oninput = e => {
+        game.sens = e.target.value / 100;
+        try { localStorage.setItem("sens", game.sens); } catch {}
+      };
+    }
     // le programme compile d'abord : on attend que l'ecran virtuel soit en place
     setTimeout(() => { if (!$("#screen-wrap").hidden) screen.src = SCREEN_URL; }, 9000);
   }
@@ -358,7 +368,12 @@ function launch(args, run = {}) {
 // deplacements relatifs au pont du conteneur (launcher/input-bridge.py), qui les injecte dans X.
 
 const BRIDGE_URL = "ws://localhost:6081";
-const game = { ws: null, dx: 0, dy: 0, raf: 0 };
+// sens : la souris du navigateur bouge par grands pas (acceleration du systeme), le jeu tourne
+// de 0.0025 rad par pixel -> on divise, et le reste fractionnaire est garde pour le coup d'apres
+// held : X ne repete pas les touches injectees par XTest, la page refait la repetition elle-meme
+const game = { ws: null, dx: 0, dy: 0, raf: 0, held: new Map(), sens: 0.3 };
+try { game.sens = parseFloat(localStorage.getItem("sens")) || game.sens; } catch {}
+const REPEAT_MS = 33;
 const X_KEYS = { Space: "space", ArrowLeft: "Left", ArrowRight: "Right", ArrowUp: "Up", ArrowDown: "Down",
   ShiftLeft: "Shift_L", ShiftRight: "Shift_R", ControlLeft: "Control_L", Enter: "Return", Tab: "Tab", Backspace: "BackSpace" };
 // touche physique (e.code) : WASD reste WASD en AZERTY, comme dans un jeu
@@ -378,6 +393,7 @@ function gameOn() {
   layer.requestPointerLock();
 }
 function gameOff() {
+  releaseKeys();
   $("#game").hidden = true;
   $("#game").classList.remove("locked");
   if (document.pointerLockElement) document.exitPointerLock();
@@ -390,22 +406,36 @@ document.addEventListener("pointerlockchange", () => {
 // deplacements cumules et envoyes une fois par image
 $("#game").addEventListener("mousemove", e => {
   if (document.pointerLockElement !== e.currentTarget) return;
-  game.dx += e.movementX; game.dy += e.movementY;
+  game.dx += e.movementX * game.sens; game.dy += e.movementY * game.sens;
   if (!game.raf) game.raf = requestAnimationFrame(() => {
-    if (game.dx || game.dy) send(`m ${Math.round(game.dx)} ${Math.round(game.dy)}`);
-    game.dx = game.dy = game.raf = 0;
+    const dx = Math.trunc(game.dx), dy = Math.trunc(game.dy);
+    if (dx || dy) send(`m ${dx} ${dy}`);
+    game.dx -= dx; game.dy -= dy; game.raf = 0;
   });
 });
 $("#game").addEventListener("mousedown", e => send(`b 1 ${e.button + 1}`));
 $("#game").addEventListener("mouseup", e => send(`b 0 ${e.button + 1}`));
-for (const type of ["keydown", "keyup"]) {
-  document.addEventListener(type, e => {
-    if (document.pointerLockElement !== $("#game") || e.repeat) return;
-    const k = xKey(e.code);
-    if (!k) return;
-    e.preventDefault();
-    send(`k ${type === "keydown" ? 1 : 0} ${k}`);
-  });
+document.addEventListener("keydown", e => {
+  if (document.pointerLockElement !== $("#game") || e.repeat) return;
+  const k = xKey(e.code);
+  if (!k || game.held.has(k)) return;
+  e.preventDefault();
+  send(`k 1 ${k}`);
+  // tant que la touche est tenue, on renvoie l'appui : le jeu avance image par image
+  game.held.set(k, setInterval(() => send(`k 1 ${k}`), REPEAT_MS));
+});
+document.addEventListener("keyup", e => {
+  const k = xKey(e.code);
+  if (!k || !game.held.has(k)) return;
+  e.preventDefault();
+  clearInterval(game.held.get(k));
+  game.held.delete(k);
+  send(`k 0 ${k}`);
+});
+// souris liberee : on relache tout, sinon une touche reste enfoncee cote X
+function releaseKeys() {
+  for (const [k, id] of game.held) { clearInterval(id); send(`k 0 ${k}`); }
+  game.held.clear();
 }
 
 function closeDrawer() {
