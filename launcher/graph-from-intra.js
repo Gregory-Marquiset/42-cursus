@@ -160,14 +160,13 @@ for (const [slug, at] of Object.entries(PINNED)) {
   n.y = Math.round(center.y + r * Math.sin(a));
 }
 
-// a quoi correspond une extremite de trace : un projet, le cercle du tronc commun, ou rien
-const endpoint = (pt, hint) => {
-  if (hint && shapeDist(hint, pt) <= SNAP) return hint;
-  const [best] = nodes.map((n) => ({ n, d: shapeDist(n, pt) })).sort((a, b) => a.d - b.d);
-  if (best && best.d <= SNAP) return best.n;
-  if (Math.abs(Math.hypot(pt[0] - center.x, pt[1] - center.y) - core) <= 30) return "core";
-  return null;
-};
+// Les liens, dessines comme l'intra les dessine. Hors tronc commun, une branche est un tronc
+// (de longs segments) auquel chaque projet se raccroche par une courte amorce : les traces ne
+// vont donc pas d'un centre a l'autre, et les recalculer casse le dessin. On les garde tels
+// quels, et on ne recalcule que pour les projets qu'on a deplaces.
+const movedIds = new Set(groupId.keys());
+const movedSlugs = new Set(Object.keys(PINNED));
+const hidden = intra.filter((p) => (p.x || p.y) && !placed.includes(p));   // les projets echoues
 
 const edges = [];
 const seen = new Set();
@@ -175,27 +174,24 @@ for (const p of placed) {
   for (const link of p.by || []) {
     const child = resolve(p.id);
     if (!child || !link.points || link.points.length < 2) continue;
-    const a = endpoint(link.points[0], child);
-    const b = endpoint(link.points[link.points.length - 1], resolve(idByProject.get(link.parent_id)));
-    if (!a || !b || a === b) continue;          // une extremite dans le vide : lien abandonne
-    const ends = [a, b].map((e) => (e === "core" ? null : e));
-    const [n1, n2] = ends;
-    const key = (n1 ? n1.id : "racine") + ">" + (n2 ? n2.id : "racine");
-    if (seen.has(key) || seen.has((n2 ? n2.id : "racine") + ">" + (n1 ? n1.id : "racine"))) continue;
+    const parentRaw = intra.find((q) => q.project_id === link.parent_id);
+    const parent = resolve(idByProject.get(link.parent_id));
+    if (parentRaw && !parent) continue;                  // parent retire : son lien part avec lui
+    // un trace qui vise un projet retire s'arrete dans le vide : on le jette aussi
+    if (hidden.some((h) => link.points.some((pt) => Math.hypot(h.x - pt[0], h.y - pt[1]) < 70))) continue;
+    const key = p.id + ":" + JSON.stringify(link.points);
+    if (seen.has(key)) continue;
     seen.add(key);
-    // un projet garde son centre ; le cercle garde le point d'origine du trace
-    // le bout pose sur le cercle est ramene pile dessus : les traces de l'intra le ratent de quelques unites
-    const onRing = (pt) => {
-      const d = Math.hypot(pt[0] - center.x, pt[1] - center.y) || 1;
-      return [Math.round(center.x + (pt[0] - center.x) * core / d), Math.round(center.y + (pt[1] - center.y) * core / d)];
-    };
-    const pts = [n1 ? [n1.x, n1.y] : onRing(link.points[0]),
-                 n2 ? [n2.x, n2.y] : onRing(link.points[link.points.length - 1])];
+    // projet deplace : son amorce ne pointe plus au bon endroit, on relie les centres
+    const rebuild = movedIds.has(p.id) || movedSlugs.has(p.slug) ||
+      (parentRaw && (movedIds.has(parentRaw.id) || movedSlugs.has(parentRaw.slug)));
+    if (rebuild && !parent) continue;
     edges.push({
-      ...(n2 ? { from: n2.id } : {}),
-      ...(n1 ? { to: n1.id } : {}),
-      points: pts,
-      done: !!n1 && !!n2 && n1.state === "done" && n2.state === "done",
+      ...(parent ? { from: parent.id } : {}),
+      to: child.id,
+      points: rebuild ? [[child.x, child.y], [parent.x, parent.y]] : link.points,
+      // comme sur l'intra, l'amorce d'un projet fait est coloree
+      done: child.state === "done" || (!!parent && parent.state === "done"),
     });
   }
 }
