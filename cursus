@@ -26,6 +26,11 @@ check_docker() {
     docker compose version >/dev/null 2>&1 || die "le plugin docker compose est requis"
 }
 
+# Un reseau commun au portail et a l'ecran virtuel : le portail sert l'ecran sous sa propre
+# adresse, sinon un visiteur distant le chercherait sur son propre ordinateur.
+NET="42-cursus"
+network() { docker network inspect "$NET" >/dev/null 2>&1 || docker network create "$NET" >/dev/null; }
+
 toolchain() {
     docker image inspect "$IMAGE" >/dev/null 2>&1 && return
     info "Construction de l'image outils $IMAGE (une seule fois)..."
@@ -192,10 +197,11 @@ run_minishell() {
 # fdf / cub3d : MiniLibX dans un ecran virtuel, affiche dans le navigateur par noVNC
 run_gui() {
     local prj="$1" bin="$2" arg="$3"
-    free_port 6080          # un seul ecran a la fois
-    DOCKER_ARGS=(--name 42-cursus-gui -p 127.0.0.1:6080:6080 -p 127.0.0.1:6081:6081
+    docker rm -f 42-cursus-gui >/dev/null 2>&1 || true   # un seul ecran a la fois
+    network
+    DOCKER_ARGS=(--name 42-cursus-gui --network "$NET"
                  -v "$(host_path "$ROOT/launcher"):/launcher:ro")
-    info "$prj s'affiche dans le navigateur : ${B}http://localhost:6080/vnc.html?autoconnect=1&resize=scale${N}"
+    info "$prj s'affiche dans la page, bouton ${B}Ecran${N}"
     info "Ctrl+C ici pour arreter"
     in_box "$P/$prj" "make -s ${4:-} >/dev/null 2>&1 || make ${4:-}; exec sh /launcher/gui.sh ./$bin \"\$@\"" "$arg"
 }
@@ -383,7 +389,8 @@ portal() {
     # en Docker rootless, le socket vit dans le runtime de l'utilisateur, pas dans /var/run
     local sock="${DOCKER_HOST#unix://}"; [ -S "$sock" ] || sock=/var/run/docker.sock
     # CURSUS_BIND : 0.0.0.0 pour publier derriere un reverse proxy, sinon la machine seule
-    docker run -d --name "$PORTAL" -p "${CURSUS_BIND:-127.0.0.1}:4242:4242" \
+    network
+    docker run -d --name "$PORTAL" --network "$NET" -p "${CURSUS_BIND:-127.0.0.1}:4242:4242" \
         -v "$sock:/var/run/docker.sock" \
         -v "$(host_path "$ROOT"):$dp" -e CURSUS_ROOT="$dp" -e CURSUS_HOST_IP="$(host_ip)" \
         42-cursus/portal >/dev/null

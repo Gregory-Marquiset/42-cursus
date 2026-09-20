@@ -223,7 +223,8 @@ const I18N = {
     game_click: "Click here to play: mouse and keyboard go to the game"
   }
 };
-const SCREEN_URL = "http://localhost:6080/vnc.html?autoconnect=1&resize=scale&reconnect=1";
+// l'ecran et le pont d'entree passent par le portail : la page marche donc aussi a distance
+const SCREEN_URL = "/screen/vnc.html?autoconnect=1&resize=scale&reconnect=1";
 let lang = (() => { try { return localStorage.getItem("lang") || "fr"; } catch { return "fr"; } })();
 let DATA, GRAPH, selected = null;
 const t = k => I18N[lang][k];
@@ -466,7 +467,7 @@ function launch(args, run = {}) {
 // sans fin. Ici la page capture la souris (Pointer Lock) et le clavier, et envoie des
 // deplacements relatifs au pont du conteneur (launcher/input-bridge.py), qui les injecte dans X.
 
-const BRIDGE_URL = "ws://localhost:6081";
+const BRIDGE_URL = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/input`;
 // sens : la souris du navigateur bouge par grands pas (acceleration du systeme), le jeu tourne
 // de 0.0025 rad par pixel -> on divise, et le reste fractionnaire est garde pour le coup d'apres
 // held : X ne repete pas les touches injectees par XTest, la page refait la repetition elle-meme
